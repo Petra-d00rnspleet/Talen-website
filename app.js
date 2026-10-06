@@ -1,6 +1,8 @@
 import { firebaseConfig } from "./firebase-config.js";
 import { LANGUAGES, HELPER_NAMES, LEVELS, PASS_SCORE } from "./data.js";
 
+window.__taalreisStarted = true;
+
 const app = document.getElementById("app");
 const syncStatus = document.getElementById("sync-status");
 const LS_KEY = "taalreis-voortgang";
@@ -31,35 +33,45 @@ function setSync(text, ok) {
   syncStatus.className = ok ? "ok" : "";
 }
 
+// Voorkomt dat een trage of niet-werkende Firebase-verbinding de site laat hangen.
+function withTimeout(promise, ms = 8000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
+  ]);
+}
+
 async function initFirebase() {
   if (!firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith("JOUW")) {
-    setSync("Lokaal opgeslagen", false);
-    return;
+    return; // geen Firebase ingesteld: alles blijft lokaal, geen melding nodig
   }
   try {
     const v = "10.14.1";
     const base = `https://www.gstatic.com/firebasejs/${v}/`;
-    const [{ initializeApp }, authMod, fsMod] = await Promise.all([
-      import(base + "firebase-app.js"),
-      import(base + "firebase-auth.js"),
-      import(base + "firebase-firestore.js"),
-    ]);
+    const [{ initializeApp }, authMod, fsMod] = await withTimeout(
+      Promise.all([
+        import(base + "firebase-app.js"),
+        import(base + "firebase-auth.js"),
+        import(base + "firebase-firestore.js"),
+      ])
+    );
     const fbApp = initializeApp(firebaseConfig);
     const auth = authMod.getAuth(fbApp);
-    const cred = await authMod.signInAnonymously(auth);
+    const cred = await withTimeout(authMod.signInAnonymously(auth));
     const db = fsMod.getFirestore(fbApp);
     const docRef = fsMod.doc(db, "users", cred.user.uid);
-    const snap = await fsMod.getDoc(docRef);
+    const snap = await withTimeout(fsMod.getDoc(docRef));
     if (snap.exists()) {
       progress = mergeProgress(progress, snap.data().progress || {});
     }
     cloud = { setDoc: fsMod.setDoc, docRef };
     saveProgress();
     setSync("Opgeslagen in de cloud", true);
-    render();
+    // Alleen opnieuw tekenen op het begin- of levelscherm, niet midden in een les
+    if (state.screen === "home" || state.screen === "levels") render();
   } catch (e) {
     console.error(e);
-    setSync("Offline: lokaal opgeslagen", false);
+    setSync("Lokaal opgeslagen", false);
   }
 }
 
