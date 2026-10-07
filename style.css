@@ -1,192 +1,2866 @@
-:root {
-  --accent: #6c5ce7;
-  --bg: #f5f3ff;
-  --text: #22204a;
-  --muted: #6b6a8a;
-  --card: #ffffff;
-  --good: #1fa971;
-  --bad: #e5484d;
+* {
+  box-sizing: border-box;
 }
 
-* { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+}
 
 body {
-  margin: 0;
-  font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
-  background: linear-gradient(160deg, #f5f3ff 0%, #e8f4ff 100%);
-  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  background: radial-gradient(ellipse 120% 70% at 50% -10%, #16204a 0%, #0a1130 45%, #05081c 100%);
+  color: #f2f2f5;
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  position: relative;
+  overflow-x: hidden;
 }
 
-.topbar {
+/* Sterrenhemel: drie gelaagde, dichte sterrenvelden die twinkelen en heel langzaam drijven */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: -40px;
+  pointer-events: none;
+  background-repeat: repeat;
+  z-index: 0;
+}
+
+.container::before {
+  content: "";
+  position: fixed;
+  inset: -40px;
+  pointer-events: none;
+  background-repeat: repeat;
+  z-index: -1;
+}
+
+/* Laag 1: kleine, dichte achtergrondsterren, goudwit */
+body::before {
+  background-image:
+    radial-gradient(1.8px 1.8px at 20px 30px, #ffe9a8, transparent),
+    radial-gradient(1.5px 1.5px at 90px 120px, #ffe9a8, transparent),
+    radial-gradient(2px 2px at 160px 60px, #ffe9a8, transparent),
+    radial-gradient(1.5px 1.5px at 210px 180px, #ffe9a8, transparent),
+    radial-gradient(1.8px 1.8px at 260px 20px, #ffe9a8, transparent),
+    radial-gradient(1.5px 1.5px at 40px 190px, #ffe9a8, transparent),
+    radial-gradient(1.7px 1.7px at 120px 220px, #ffe9a8, transparent),
+    radial-gradient(1.6px 1.6px at 300px 150px, #ffe9a8, transparent),
+    radial-gradient(1.8px 1.8px at 340px 60px, #ffe9a8, transparent),
+    radial-gradient(1.5px 1.5px at 70px 260px, #ffe9a8, transparent),
+    radial-gradient(1.7px 1.7px at 190px 280px, #ffe9a8, transparent),
+    radial-gradient(1.6px 1.6px at 250px 240px, #ffe9a8, transparent);
+  background-size: 360px 300px;
+  opacity: 1;
+  animation: sterren-twinkelen-a 3.5s ease-in-out infinite alternate,
+             sterren-drijven-a 70s linear infinite alternate;
+}
+
+/* Laag 2: middelgrote sterren met een felgouden gloed */
+body::after {
+  background-image:
+    radial-gradient(2.8px 2.8px at 60px 80px, #ffd977, transparent 65%),
+    radial-gradient(3.6px 3.6px at 130px 20px, #ffd977, transparent 65%),
+    radial-gradient(2.8px 2.8px at 190px 140px, #ffd977, transparent 65%),
+    radial-gradient(3.2px 3.2px at 240px 90px, #ffd977, transparent 65%),
+    radial-gradient(3.6px 3.6px at 10px 150px, #ffd977, transparent 65%),
+    radial-gradient(2.8px 2.8px at 300px 200px, #ffd977, transparent 65%),
+    radial-gradient(3.2px 3.2px at 350px 260px, #ffd977, transparent 65%),
+    radial-gradient(2.8px 2.8px at 100px 300px, #ffd977, transparent 65%);
+  background-size: 380px 320px;
+  background-position: 40px 60px;
+  opacity: 1;
+  animation: sterren-twinkelen-b 5s ease-in-out infinite alternate-reverse,
+             sterren-drijven-b 90s linear infinite alternate;
+}
+
+/* Laag 3: een paar grote, felle goudsterren met gloed */
+.container::before {
+  background-image:
+    radial-gradient(5px 5px at 80px 100px, #ffe9a8, transparent 60%),
+    radial-gradient(3.5px 3.5px at 80px 100px, #fff8e1, transparent 80%),
+    radial-gradient(5.5px 5.5px at 250px 40px, #ffe9a8, transparent 60%),
+    radial-gradient(4px 4px at 250px 40px, #fff8e1, transparent 80%),
+    radial-gradient(4.5px 4.5px at 340px 220px, #ffe9a8, transparent 60%),
+    radial-gradient(3px 3px at 340px 220px, #fff8e1, transparent 80%),
+    radial-gradient(5.5px 5.5px at 150px 320px, #ffe9a8, transparent 60%),
+    radial-gradient(4px 4px at 150px 320px, #fff8e1, transparent 80%),
+    radial-gradient(5px 5px at 20px 260px, #ffe9a8, transparent 60%),
+    radial-gradient(3.5px 3.5px at 20px 260px, #fff8e1, transparent 80%);
+  background-size: 420px 380px;
+  background-position: 10px 20px;
+  opacity: 1;
+  animation: sterren-twinkelen-c 4s ease-in-out infinite alternate,
+             sterren-drijven-c 110s linear infinite alternate;
+}
+
+@keyframes sterren-twinkelen-a {
+  from { opacity: 0.7; }
+  to   { opacity: 1; }
+}
+
+@keyframes sterren-twinkelen-b {
+  from { opacity: 0.6; }
+  to   { opacity: 1; }
+}
+
+@keyframes sterren-twinkelen-c {
+  from { opacity: 0.55; }
+  to   { opacity: 1; }
+}
+
+/* Heel trage drift, zodat de sterren een beetje bewegen zonder afleidend te zijn */
+@keyframes sterren-drijven-a {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(-25px, 18px); }
+}
+
+@keyframes sterren-drijven-b {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(22px, -16px); }
+}
+
+@keyframes sterren-drijven-c {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(-15px, -20px); }
+}
+
+/* Foutbalk bovenaan als Firebase niet goed is ingesteld */
+#firebase-fout-balk {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #d63447;
+  color: white;
+  padding: 10px 16px;
+  font-size: 13px;
+  text-align: center;
+  z-index: 999;
+}
+
+.container {
+  width: 100%;
+  max-width: 720px;
+  min-height: 100vh;
+  background: transparent;
+  padding: 32px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.scherm {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.scherm.actief {
+  display: flex;
+}
+
+/* ---------- Gouden titelstijl (overal hergebruikt) ---------- */
+
+.titel-regenboog {
+  font-weight: 800;
+  text-shadow: 0 0 18px rgba(240, 192, 77, 0.35);
+}
+
+@keyframes goud-schuiven {
+  0%   { background-position: 0% 0; }
+  100% { background-position: 300% 0; }
+}
+
+/* Titel op het startscherm (QUIZZZZZZZZZZZZZZ) krijgt een schuivende goudglans */
+h1.titel-regenboog {
+  background: linear-gradient(90deg,
+    #caa43c, #fff6d8, #f0c04d, #ffe9a8, #f0c04d, #fff6d8, #caa43c);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: goud-schuiven 5s linear infinite;
+  font-size: 44px;
+  text-align: center;
+  letter-spacing: 1px;
+  margin: 12px 0 4px;
+}
+
+h2.titel-regenboog {
+  color: #f0c04d;
+  font-size: 26px;
+  margin: 0 0 4px 0;
+}
+
+.subtitel {
+  margin: 0 0 20px 0;
+  color: #9a97a8;
+  text-align: center;
+}
+
+/* ---------- Grote vakken op het startscherm ---------- */
+
+.vakken-rij {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Bovenste rij: Quiz maken, Speelbare quizzen, Meedoen aan quiz — 3 even brede vakken. */
+.vak-maken {
+  grid-column: 1 / 3;
+}
+
+.vak-speelbaar {
+  grid-column: 3 / 5;
+}
+
+.vak-meedoen {
+  grid-column: 5 / 7;
+}
+
+/* Onderste rij: Winkel en Dierenverzameling — zelfde breedte, maar gecentreerd
+   onder de bovenste rij (een omgekeerde piramide/toren). */
+.vak-winkel {
+  grid-column: 1 / 3;
+}
+
+.vak-dierentuin {
+  grid-column: 3 / 5;
+}
+
+.vak-wiel {
+  grid-column: 5 / 7;
+}
+
+@media (max-width: 480px) {
+  .vakken-rij {
+    grid-template-columns: 1fr;
+  }
+
+  .vak-maken,
+  .vak-speelbaar,
+  .vak-meedoen,
+  .vak-winkel,
+  .vak-dierentuin,
+  .vak-wiel {
+    grid-column: 1 / -1;
+  }
+}
+
+.vak {
+  border: 2px solid #b8863c;
+  border-radius: 14px;
+  padding: 14px 10px;
+  min-height: 70px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #0c1230;
+  position: relative;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.vak:hover {
+  transform: translateY(-4px);
+  border-color: #f0c04d;
+  box-shadow: 0 0 0 2px #f0c04d, 0 12px 30px rgba(240, 192, 77, 0.35);
+}
+
+.vak-maken {
+  background: linear-gradient(160deg, #191233 0%, #0c1230 60%);
+}
+
+.vak-speelbaar {
+  background: linear-gradient(160deg, #142615 0%, #0c1230 60%);
+}
+
+.vak-meedoen {
+  background: linear-gradient(160deg, #0d1c3a 0%, #0c1230 60%);
+}
+
+.vak-winkel {
+  background: linear-gradient(160deg, #2a1c3a 0%, #0c1230 60%);
+}
+
+.vak-dierentuin {
+  background: linear-gradient(160deg, #1c2a1c 0%, #0c1230 60%);
+}
+
+.vak-wiel {
+  background: linear-gradient(160deg, #331c3a 0%, #0c1230 60%);
+}
+
+/* ---------- Munten (verdien je door een live quiz te winnen; besteed je in de winkel) ---------- */
+
+.munten-weergave {
+  align-self: center;
+  background: #10152e;
+  border: 1px solid #4a3c1a;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-weight: 700;
+  color: #f0c04d;
+  margin: 0 0 14px 0;
+}
+
+/* ---------- Algemene elementen ---------- */
+
+.btn {
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes glitter-schuiven {
+  0%   { background-position: 0% 0; }
+  100% { background-position: 300% 0; }
+}
+
+.btn-primary {
+  background-image: linear-gradient(120deg, #fff8e1, #ffe9a8, #fffdf5, #f0c04d, #fff8e1, #ffe9a8);
+  background-size: 300% 100%;
+  animation: glitter-schuiven 5s linear infinite;
+  color: #0a0a0a;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.btn-secondary {
+  background: #10152e;
+  color: #e6cd8f;
+  border: 1px solid #4a3c1a;
+}
+
+.btn-secondary:hover {
+  border-color: #f0c04d;
+}
+
+.btn-terug {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: #f0c04d;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+input[type="text"], input[type="number"], select {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #4a3c1a;
+  background: #10152e;
+  color: #f2f2f5;
+  font-size: 15px;
+  width: 100%;
+}
+
+input[type="text"]::placeholder {
+  color: #6b6580;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, select:focus {
+  outline: none;
+  border-color: #f0c04d;
+  box-shadow: 0 0 0 1px #f0c04d;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6cd8f;
+  margin-top: 4px;
+}
+
+.openbaar-optie {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #e6cd8f;
+  cursor: pointer;
+}
+
+.openbaar-optie input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #f0c04d;
+  cursor: pointer;
+}
+
+.foutmelding {
+  color: #ff5c72;
+  font-size: 14px;
+  min-height: 18px;
+}
+
+.quiz-geblokkeerd-melding {
+  background: #34131a;
+  border: 1px solid #ff5c72;
+  color: #ffb0bc;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin: 0;
+}
+
+.code-weergave {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 5px;
+  text-align: center;
+  background: #10152e;
+  border: 1px solid #b8863c;
+  padding: 18px;
+  border-radius: 14px;
+  margin: 12px 0;
+  color: #f0c04d;
+}
+
+.punten-stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #10152e;
+  border: 1px solid #4a3c1a;
+  border-radius: 12px;
+  padding: 6px;
+}
+
+.punten-stepper .veld-punten {
+  flex: 1;
+  width: auto;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: #f0c04d;
+  padding: 8px 4px;
+  letter-spacing: 0.5px;
+}
+
+.punten-stepper .veld-punten:focus {
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+.btn-punten-stap {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid #4a3c1a;
+  background: #0c1130;
+  color: #f0c04d;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.btn-punten-stap:hover {
+  border-color: #f0c04d;
+  filter: brightness(1.15);
+}
+
+.btn-punten-stap:active {
+  transform: scale(0.92);
+}
+
+.vraag-blok {
+  border: 1px solid #4a3c1a;
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #0c1130;
+}
+
+.vraag-blok-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 16px 20px;
 }
-.logo { font-weight: 800; font-size: 1.2rem; color: var(--text); text-decoration: none; }
-#sync-status { font-size: 0.8rem; color: var(--muted); }
-#sync-status.ok { color: var(--good); }
 
-main { max-width: 760px; margin: 0 auto; padding: 0 20px 60px; }
+.antwoord-invoer-rij {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-.hero { text-align: center; padding: 20px 0 10px; }
-.hero h1 { font-size: 2.4rem; margin: 0 0 8px; }
-.hero.small h1 { font-size: 1.7rem; }
-.hero p { color: var(--muted); margin: 0; }
+.antwoord-invoer-rij.verborgen {
+  display: none;
+}
 
-.lang-grid { display: grid; gap: 16px; margin-top: 24px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-.lang-card {
-  border: none;
-  border-radius: 24px;
-  padding: 28px 16px;
-  background: var(--card);
-  box-shadow: 0 8px 24px rgba(40, 30, 120, 0.1);
-  border-bottom: 6px solid var(--card-color, var(--accent));
-  border-bottom-color: var(--card);
+.antwoord-invoer-rij .veld-antwoord {
+  flex: 1;
+}
+
+.veld-goed-vinkje {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: #37e07c;
   cursor: pointer;
+}
+
+.vraag-blok-titel {
+  color: #e6cd8f;
+}
+
+.btn-verwijder-vraag {
+  background: none;
+  border: none;
+  color: #ff5c72;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.voortgang {
+  margin: 0;
+  font-size: 13px;
+  color: #9a97a8;
+}
+
+.quiz-item {
+  border: 1px solid #4a3c1a;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: #0c1130;
+}
+
+.quiz-item-info strong {
+  display: block;
+  color: #f0c04d;
+}
+
+.quiz-item-info span {
+  font-size: 13px;
+  color: #9a97a8;
+}
+
+.btn-spelen {
+  background: linear-gradient(90deg, #f0c04d, #ffe9a8);
+  color: #1a1200;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-spelen:hover {
+  filter: brightness(1.08);
+}
+
+.antwoorden-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.antwoord-optie {
+  border: 1px solid #4a3c1a;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  background: #10152e;
+  color: #f2f2f5;
+}
+
+.antwoord-optie:hover {
+  border-color: #f0c04d;
+}
+
+.antwoord-optie.geselecteerd {
+  border-color: #f0c04d;
+  background: #1c1a33;
+  box-shadow: 0 0 0 1px #f0c04d;
+}
+
+.antwoord-optie.geselecteerd::after {
+  content: " ✓";
+  color: #f0c04d;
+}
+
+.antwoord-optie.goed {
+  background: #123023;
+  border-color: #37e07c;
+  color: #8cf5b6;
+}
+
+.antwoord-optie.goed::after {
+  content: " ✔";
+}
+
+.antwoord-optie.fout {
+  background: #34131a;
+  border-color: #ff5c72;
+  color: #ffb0bc;
+}
+
+/* ---------- Wekker per vraag (bij de quizmaster) ---------- */
+
+.vraag-timer {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  margin: 4px auto 14px;
+}
+
+.vraag-timer-ring {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.vraag-timer-ring-baan {
+  fill: none;
+  stroke: #1c1a33;
+  stroke-width: 8;
+}
+
+.vraag-timer-ring-vulling {
+  fill: none;
+  stroke: #f0c04d;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 283;
+  stroke-dashoffset: var(--doel, 0);
+  transition: stroke-dashoffset 0.25s linear, stroke 0.25s linear;
+}
+
+.vraag-timer-getal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 800;
+  color: #f0c04d;
+}
+
+.vraag-timer.bijna-om .vraag-timer-ring-vulling {
+  stroke: #ff5c72;
+}
+
+.vraag-timer.bijna-om .vraag-timer-getal {
+  color: #ff5c72;
+}
+
+/* ---------- Wachtkamer (host) ---------- */
+
+.wachtkamer-spelerslijst {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 20px;
+}
+
+.speler-chip {
+  background: #10152e;
+  border: 1px solid #4a3c1a;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: #e6cd8f;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.speler-chip:hover {
+  border-color: #ff5c72;
+}
+
+.speler-chip:hover .speler-chip-kruis {
+  color: #ff5c72;
+}
+
+.speler-chip-kruis {
+  color: #8a7a4a;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ---------- Laadindicator (wachten op anderen) ---------- */
+
+.laad-rij {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.laad-spinner {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border: 2px solid #4a3c1a;
+  border-top-color: #f0c04d;
+  border-radius: 50%;
+  animation: laad-draaien 0.8s linear infinite;
+}
+
+@keyframes laad-draaien {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Scorebord ---------- */
+
+.scorebord-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 20px;
+}
+
+.scorebord-rij {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #4a3c1a;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: #0c1130;
+}
+
+.scorebord-rij.eigen {
+  border-color: #f0c04d;
+  box-shadow: 0 0 0 1px #f0c04d;
+}
+
+.scorebord-plek {
+  font-weight: 800;
+  color: #9a97a8;
+  width: 30px;
+  text-align: center;
+}
+
+.scorebord-naam {
+  flex: 1;
+  color: #f2f2f5;
+  font-weight: 600;
+}
+
+.scorebord-score {
+  font-weight: 800;
+  color: #f0c04d;
+}
+
+/* ---------- Omslagfoto kiezen (nieuwe/bewerken quiz) ---------- */
+
+.omslag-kiezer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.omslag-preview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  border: 2px solid #b8863c;
+  overflow: hidden;
+  background: #10152e;
+}
+
+.omslag-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.omslag-upload-rij {
+  display: flex;
+}
+
+.omslag-subtitel {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #9a97a8;
+}
+
+.omslag-galerij {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.omslag-optie {
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  border: 2px solid #4a3c1a;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: #10152e;
+}
+
+.omslag-optie img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.omslag-optie:hover {
+  border-color: #f0c04d;
+}
+
+.omslag-optie.geselecteerd {
+  border-color: #f0c04d;
+  box-shadow: 0 0 0 2px #f0c04d;
+}
+
+/* ---------- Overzicht "Mijn quizzen": kaarten met omslagfoto ---------- */
+
+.quizzen-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+@media (max-width: 560px) {
+  .quizzen-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quiz-item {
+  border: 1px solid #4a3c1a;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0c1130;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin-top: 0;
+}
+
+.quiz-item-afbeelding {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  border-bottom: 1px solid #4a3c1a;
+}
+
+.quiz-item-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quiz-item-info strong {
+  display: block;
+  color: #f0c04d;
+  font-size: 16px;
+}
+
+.quiz-item-info span {
+  display: block;
+  font-size: 13px;
+  color: #9a97a8;
+}
+
+.box-al-gekocht {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.box-aantal-gekocht {
+  color: #f0c04d;
+}
+
+.box-status {
+  font-weight: 600;
+}
+
+.box-status-offline {
+  color: #ff8fa0;
+}
+
+.box-status-vanaf {
+  color: #ffb066;
+}
+
+.quiz-item-knoppen {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.btn-aanpassen-quiz {
+  background: #10152e;
+  color: #f0c04d;
+  border: 1px solid #4a3c1a;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-aanpassen-quiz:hover {
+  border-color: #f0c04d;
+}
+
+.btn-verwijderen-quiz {
+  background: #2a1218;
+  color: #ff8fa0;
+  border: 1px solid #4a2029;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-verwijderen-quiz:hover {
+  border-color: #ff5c72;
+}
+
+.btn-blokkeren-quiz {
+  background: #2a1e10;
+  color: #ffb066;
+  border: 1px solid #4a361a;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-blokkeren-quiz:hover {
+  border-color: #ffb066;
+}
+
+.btn-blokkeren-quiz.is-geblokkeerd {
+  background: #10152e;
+  color: #8fe0a8;
+  border-color: #1f4a30;
+}
+
+.btn-blokkeren-quiz.is-geblokkeerd:hover {
+  border-color: #8fe0a8;
+}
+
+.btn-overzicht-blokkeren {
+  background: none;
+  border: 1px solid #4a361a;
+  color: #ffb066;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+.btn-overzicht-blokkeren:hover {
+  border-color: #ffb066;
+}
+
+.btn-overzicht-blokkeren.is-geblokkeerd {
+  border-color: #1f4a30;
+  color: #8fe0a8;
+}
+
+.btn-overzicht-blokkeren.is-geblokkeerd:hover {
+  border-color: #8fe0a8;
+}
+
+/* ---------- Sitebeheer (inlogknopje + inlogvenster) ---------- */
+
+.btn-sitebeheer {
+  align-self: center;
+  margin-top: 28px;
+  background: none;
+  border: 1px solid #33304a;
+  color: #6b6580;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-sitebeheer:hover {
+  border-color: #4a3c1a;
+  color: #9a97a8;
+}
+
+.btn-sitebeheer.actief {
+  border-color: #f0c04d;
+  color: #f0c04d;
+}
+
+/* ---------- Profiel: badge rechtsboven (gebruikersnaam + poppetje) ---------- */
+
+.profiel-badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  padding: 5px;
+  background: #10152e;
+  border: 1px solid #4a3c1a;
+  border-radius: 50%;
+  color: #e6cd8f;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.profiel-badge:hover {
+  border-color: #f0c04d;
+  color: #f0c04d;
+  transform: scale(1.04);
+}
+
+.profiel-badge-poppetje {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  line-height: 0;
+}
+
+.profiel-badge-poppetje:empty {
+  display: none;
+}
+
+.profiel-badge-poppetje svg {
+  display: block;
+  width: 36px;
+  height: 36px;
+  overflow: visible;
+}
+
+#profiel-badge-tekst:empty {
+  display: none;
+}
+#profiel-badge-tekst {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.profiel-overlay {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+}
+
+.profiel-venster {
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.profiel-overlay-poppetje {
+  width: 96px;
+  height: 96px;
+  margin: 4px auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.profiel-overlay-poppetje svg {
+  display: block;
+  width: 96px;
+  height: 96px;
+  overflow: visible;
+}
+
+.profiel-dieren-kiezer {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 4px;
+}
+
+.profiel-kiezer-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.profiel-kiezer-tab {
+  flex: 1;
+  border: 1px solid #4a3c1a;
+  background: #10152e;
+  color: #9a97a8;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profiel-kiezer-tab.actief {
+  border-color: #f0c04d;
+  color: #f0c04d;
+  background: #1c1a33;
+}
+
+.profiel-dieren-kiezer.accessoires {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.profiel-dieren-kiezer .dier-knop {
+  position: relative;
+}
+
+.profiel-dieren-kiezer .dier-knop .poppetje-svg {
+  margin: 0 auto;
+}
+
+@media (max-width: 480px) {
+  .profiel-badge {
+    position: relative;
+    width: 42px;
+    height: 42px;
+  }
+
+  .profiel-badge-poppetje,
+  .profiel-badge-poppetje svg {
+    width: 33px;
+    height: 33px;
+  }
+
+  .profiel-overlay {
+    padding: 10px;
+  }
+
+  .profiel-venster {
+    max-height: calc(100vh - 20px);
+    padding: 24px 18px 20px;
+  }
+}
+
+/* ---------- Slotje op vakken die een profiel vereisen ---------- */
+
+.vak-slotje {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 14px;
+  opacity: 0.85;
+  display: none;
+}
+
+.vak.vak-op-slot .vak-slotje {
+  display: inline;
+}
+
+.vak.vak-op-slot {
+  opacity: 0.82;
+}
+
+.sitebeheer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 28, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.sitebeheer-overlay.actief {
+  display: flex;
+}
+
+@keyframes sitebeheer-verschijnen {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sitebeheer-venster {
+  width: 100%;
+  max-width: 380px;
+  background: linear-gradient(165deg, #171d42 0%, #0b1029 65%);
+  border: 1px solid #b8863c;
+  border-radius: 20px;
+  padding: 30px 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(240, 192, 77, 0.08);
+  animation: sitebeheer-verschijnen 0.2s ease-out;
+}
+
+.sitebeheer-icoon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #3a2a10, #120e04);
+  border: 1px solid #b8863c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin: 0 auto 6px;
+  box-shadow: 0 0 18px rgba(240, 192, 77, 0.25);
+}
+
+.sitebeheer-venster h3 {
+  margin: 0;
+  color: #f0c04d;
+  font-size: 21px;
+  text-align: center;
+}
+
+.sitebeheer-venster p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #9a97a8;
+  text-align: center;
+}
+
+.sitebeheer-venster label {
+  margin-top: 2px;
+}
+
+.sitebeheer-venster input {
+  margin-bottom: 2px;
+}
+
+.sitebeheer-knoppen {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ---------- Melding op een eigen quiz: door sitebeheer weggehaald bij openbaar ---------- */
+
+.quiz-beheer-melding {
+  background: #34131a;
+  border-bottom: 1px solid #ff5c72;
+  color: #ffb0bc;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.quiz-beheer-melding-sluiten {
+  background: none;
+  border: 1px solid #ff5c72;
+  color: #ffb0bc;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.quiz-beheer-melding-sluiten:hover {
+  background: #ff5c72;
+  color: #2a0910;
+}
+
+.quiz-beheer-melding-geblokkeerd {
+  background: #2a1e10;
+  border-bottom: 1px solid #ffb066;
+  color: #ffd8a8;
+  justify-content: flex-start;
+}
+
+/* ---------- Zoekbalken (speelbare quizzen + sitebeheer makersoverzicht) ---------- */
+
+.zoekbalk {
+  margin-bottom: 14px;
+}
+
+.sitebeheer-makers-zoek {
+  margin-bottom: 12px;
+}
+
+.sitebeheer-makers-zoek input {
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
+.sitebeheer-makers-leeg {
+  color: #9a97a8;
+  font-size: 14px;
+  margin: 6px 0 0;
+}
+
+/* ---------- Sitebeheer: overzicht van alle quizmakers ---------- */
+
+.sitebeheer-makers {
+  background: #0c1130;
+  border: 1px solid #f0c04d;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 16px 0;
+}
+
+.sitebeheer-makers summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #f0c04d;
+  user-select: none;
+}
+
+.sitebeheer-makers summary::-webkit-details-marker {
+  display: none;
+}
+
+.sitebeheer-makers summary::after {
+  content: '▸';
+  font-size: 20px;
+  color: #e6cd8f;
+}
+
+.sitebeheer-makers details[open] summary::after {
+  content: '▾';
+}
+
+.sitebeheer-makers summary:hover {
+  filter: brightness(1.15);
+}
+
+.sitebeheer-makers details[open] summary {
+  margin-bottom: 8px;
+}
+
+.sitebeheer-maker-rij {
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sitebeheer-maker-rij:first-of-type {
+  border-top: none;
+}
+
+.sitebeheer-maker-naam-rij {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.sitebeheer-maker-rij strong {
+  color: #f0c04d;
+}
+
+.btn-overzicht-naam-wijzigen {
+  background: none;
+  border: 1px solid #33304a;
+  color: #c9c6d8;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-overzicht-naam-wijzigen:hover {
+  border-color: #f0c04d;
+  color: #f0c04d;
+}
+
+.btn-overzicht-naam-wijzigen:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.sitebeheer-maker-telling {
+  font-size: 13px;
+  color: #9a97a8;
+}
+
+.sitebeheer-maker-rij ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 14px;
+}
+
+.sitebeheer-maker-code {
+  font-size: 12px;
+  color: #9a97a8;
+  margin-left: 4px;
+}
+
+/* ---------- Foto's bij vragen + grote schermen tijdens de live quiz ---------- */
+
+[hidden] {
+  display: none !important;
+}
+
+/* Foto in het formulier (per vraag) */
+.vraag-foto-kiezer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vraag-foto-preview {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 2px solid #b8863c;
+  background: #10152e;
+}
+
+.vraag-foto-knoppen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Foto tijdens de quiz (host en spelers) */
+.vraag-foto {
+  width: 100%;
+  max-height: 45vh;
+  object-fit: contain;
+  border-radius: 14px;
+  border: 2px solid #b8863c;
+  background: #10152e;
+  display: block;
+}
+
+.scherm-gecentreerd {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Groot laadteken (speler heeft geantwoord en wacht op de quizmaster) */
+.laad-spinner-groot {
+  width: 110px;
+  height: 110px;
+  border: 10px solid #4a3c1a;
+  border-top-color: #f0c04d;
+  border-radius: 50%;
+  animation: laad-draaien 0.9s linear infinite;
+}
+
+/* Alleen "goed" of "fout" in het groot */
+.groot-resultaat {
+  font-size: clamp(44px, 14vw, 96px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.groot-resultaat.goed {
+  color: #37e07c;
+  text-shadow: 0 0 24px rgba(55, 224, 124, 0.45);
+}
+
+.groot-resultaat.fout {
+  color: #ff5c72;
+  text-shadow: 0 0 24px rgba(255, 92, 114, 0.4);
+}
+
+/* Label boven een groot getal/antwoord */
+.groot-label {
+  margin: 0;
+  font-size: clamp(18px, 4vw, 26px);
+  font-weight: 700;
+  color: #e6cd8f;
+}
+
+.scherm-gecentreerd .antwoorden-lijst {
+  width: 100%;
+}
+
+/* ---------- Host: resultaatscherm ("x van y had het goed") ---------- */
+
+h2.titel-regenboog.host-resultaat-vraag {
+  font-size: 20px;
+  color: #e6cd8f;
+  text-shadow: none;
+  margin: 0;
+}
+
+.resultaat-kop {
+  margin: 0;
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 800;
+  color: #f0c04d;
+  text-shadow: 0 0 18px rgba(240, 192, 77, 0.35);
+  animation: resultaat-verschijnen 0.5s ease-out both;
+}
+
+.resultaat-ring-wrap {
+  position: relative;
+  width: min(60vw, 200px);
+  flex-shrink: 0;
+  aspect-ratio: 1;
+}
+
+/* Ring links, tekst rechts (onder elkaar op een smal scherm) */
+.resultaat-onder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 28px;
+  margin: 6px 0;
+}
+
+.resultaat-tekstkolom {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.resultaat-ring {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 0 14px rgba(55, 224, 124, 0.3));
+}
+
+.resultaat-ring-baan {
+  fill: none;
+  stroke: #1c1a33;
+  stroke-width: 12;
+}
+
+.resultaat-ring-vulling {
+  fill: none;
+  stroke: #37e07c;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke-dasharray: 377;
+  stroke-dashoffset: var(--doel, 377);
+  animation: ring-vullen 1.1s ease-out;
+}
+
+.resultaat-ring-vulling.leeg {
+  stroke-opacity: 0;
+}
+
+@keyframes ring-vullen {
+  from { stroke-dashoffset: 377; }
+}
+
+@keyframes resultaat-verschijnen {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+}
+
+.resultaat-ring-midden {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.resultaat-aantal {
+  font-size: clamp(38px, 10vw, 56px);
+  font-weight: 800;
+  line-height: 1;
+  color: #f0c04d;
+  text-shadow: 0 0 22px rgba(240, 192, 77, 0.35);
+}
+
+.resultaat-aantal-label {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #9a97a8;
+}
+
+.resultaat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.resultaat-chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #4a3c1a;
+  background: #10152e;
+  font-size: 15px;
+  font-weight: 700;
+  color: #e6cd8f;
+}
+
+.resultaat-chip.goed {
+  background: #123023;
+  border-color: #37e07c;
+  color: #8cf5b6;
+}
+
+.resultaat-chip.fout {
+  background: #34131a;
+  border-color: #ff5c72;
+  color: #ffb0bc;
+}
+
+/* ---------- Het goede antwoord in het groot (host + spelers) ---------- */
+
+.antwoord-kop {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #8cf5b6;
+}
+
+.antwoord-optie.antwoord-groot {
+  cursor: default;
+  text-align: center;
+  font-size: clamp(28px, 7vw, 56px);
+  font-weight: 800;
+  line-height: 1.2;
+  padding: 30px 20px;
+  overflow-wrap: anywhere;
+  background: linear-gradient(135deg, #123023, #0d2a1c);
+  border: 3px solid #37e07c;
+  border-radius: 18px;
+  color: #eafff2;
+  box-shadow: 0 0 40px rgba(55, 224, 124, 0.3);
+  animation: antwoord-pop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) 0.15s both;
+}
+
+.antwoord-optie.antwoord-groot:nth-child(2) { animation-delay: 0.3s; }
+.antwoord-optie.antwoord-groot:nth-child(3) { animation-delay: 0.45s; }
+.antwoord-optie.antwoord-groot:nth-child(4) { animation-delay: 0.6s; }
+
+.antwoord-optie.antwoord-groot::after {
+  content: none;
+}
+
+@keyframes antwoord-pop {
+  from { opacity: 0; transform: scale(0.85); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resultaat-kop,
+  .resultaat-ring-vulling,
+  .antwoord-optie.antwoord-groot {
+    animation: none;
+  }
+}
+
+.scherm-gecentreerd .btn {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ---------- Geluksrad (1x per dag gratis draaien voor munten) ---------- */
+
+.wiel-omgeving {
+  position: relative;
+  width: min(280px, 78vw);
+  height: min(280px, 78vw);
+  margin: 6px auto 4px;
+}
+
+.wiel-wijzer {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 30px;
+  color: #f0c04d;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 3;
+}
+
+.wiel-schijf {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 6px solid #b8863c;
+  box-shadow: 0 0 0 3px #0c1230, 0 12px 34px rgba(0, 0, 0, 0.5);
+  transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+}
+
+.wiel-schijf svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wiel-knop-midden {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 25%;
+  height: 25%;
+  min-width: 56px;
+  min-height: 56px;
+  border-radius: 50%;
+  border: 4px solid #0c1230;
+  background-image: linear-gradient(120deg, #fff8e1, #ffe9a8, #fffdf5, #f0c04d, #fff8e1, #ffe9a8);
+  background-size: 300% 100%;
+  animation: glitter-schuiven 5s linear infinite;
+  color: #0a0a0a;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  z-index: 4;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.wiel-knop-midden:disabled {
+  animation: none;
+  background-image: none;
+  background: #2a2440;
+  color: #9a97a8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.wiel-resultaat-tekst {
+  min-height: 20px;
+  font-weight: 700;
+  color: #f0c04d;
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+/* ---------- Geluksrad aanpassen (alleen sitebeheer) ---------- */
+
+.wiel-venster {
+  max-width: 460px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.wiel-segmenten-lijst {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  transition: transform 0.15s, box-shadow 0.15s;
+  margin: 6px 0;
+}
+
+.wiel-segment-rij {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #4a3c1a;
+  border-radius: 12px;
+  background: #10152e;
+}
+
+.wiel-segment-rij-boven,
+.wiel-segment-rij-onder {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.wiel-segment-rij-boven .wiel-segment-type {
+  flex: 0 0 110px;
+}
+
+.wiel-segment-rij-boven .wiel-segment-naam {
+  flex: 1;
+  min-width: 0;
+}
+
+.wiel-segment-rij-onder .wiel-segment-munten,
+.wiel-segment-rij-onder .wiel-segment-dier,
+.wiel-segment-rij-onder .wiel-segment-accessoire {
+  flex: 1;
+  min-width: 0;
+}
+
+.wiel-segment-rij-onder .wiel-segment-kans {
+  flex: 0 0 64px;
+}
+
+.wiel-segment-rij select {
+  padding: 12px 10px;
+  border-radius: 10px;
+  border: 1px solid #4a3c1a;
+  background: #10152e;
+  color: #f2f2f5;
+  font-size: 15px;
+}
+
+.wiel-segment-verwijderen {
+  flex: 0 0 auto;
+  background: #34131a;
+  border: 1px solid #ff5c72;
+  color: #ffb0bc;
+  border-radius: 10px;
+  width: 40px;
+  height: 44px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.wiel-segment-verwijderen:hover {
+  filter: brightness(1.15);
+}
+
+@media (max-width: 420px) {
+  .wiel-segment-rij-boven {
+    flex-wrap: wrap;
+  }
+
+  .wiel-segment-rij-boven .wiel-segment-naam {
+    flex-basis: 100%;
+    order: 3;
+  }
+}
+
+
+/* ---------- Kiezen: met mensen of alleen spelen ---------- */
+
+.box-venster {
+  max-width: 480px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.box-venster .dieren-kiezer {
+  max-width: 100%;
+}
+
+.sitebeheer-venster.speelkeuze-venster {
+  max-width: 440px;
+}
+
+.speelkeuze-optie {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #4a3c1a;
+  background: #10152e;
+  color: #f2f2f5;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.speelkeuze-optie:hover:not(:disabled) {
+  border-color: #f0c04d;
+  background: #1c1a33;
+  box-shadow: 0 0 0 1px #f0c04d;
+}
+
+.speelkeuze-optie:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.speelkeuze-icoon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.speelkeuze-tekst {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.speelkeuze-tekst strong {
+  font-size: 17px;
+  color: #f0c04d;
+}
+
+.speelkeuze-tekst small {
+  font-size: 13px;
+  color: #9a97a8;
+}
+
+
+/* ---------- Dieren: kiezen in de wachtkamer + tonen bij de naam ---------- */
+
+.speler-wachtkamer-dier {
+  font-size: 110px;
+  line-height: 1;
+  text-align: center;
+  min-height: 115px;
+}
+
+.dieren-kiezer {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.dier-knop {
+  position: relative;
+  font-size: 50px;
+  line-height: 1;
+  padding: 6px 0;
+  border-radius: 14px;
+  border: 2px solid #4a3c1a;
+  background: #10152e;
+  cursor: pointer;
+}
+
+.dier-knop-badge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: #f0c04d;
+  color: #10152e;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+/* In het accessoires-tabblad iets grotere knoppen, zodat je goed ziet hoe het staat */
+.dieren-kiezer.accessoires {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.dieren-kiezer.accessoires .dier-knop {
+  font-size: 68px;
+}
+
+.dier-knop:hover {
+  border-color: #b8863c;
+  background: #1c1a33;
+}
+
+.dier-knop.gekozen {
+  border-color: #f0c04d;
+  background: #1c1a33;
+  box-shadow: 0 0 0 2px rgba(240, 192, 77, 0.4), 0 0 16px rgba(240, 192, 77, 0.25);
+}
+
+/* Dierenverzameling: dieren/accessoires die je nog niet hebt staan grijs met een slotje.
+   Dieren/accessoires die je wél hebt, kun je hier aanklikken om te verkopen. */
+.verzameling-kiezer {
+  max-width: 460px;
+}
+
+.verzameling-kiezer .dier-knop {
+  position: relative;
+}
+
+.verzameling-kiezer .dier-knop:disabled {
+  cursor: not-allowed;
+}
+
+.verzameling-kiezer .dier-knop:not(:disabled):hover {
+  border-color: #ff5c72;
+  background: #1c1a33;
+  box-shadow: 0 0 0 2px rgba(255, 92, 114, 0.35);
+}
+
+.verzameling-kiezer .dier-knop.niet-bezit {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.verzameling-kiezer .dier-knop.niet-bezit::after {
+  content: "🔒";
+  position: absolute;
+  bottom: 2px;
+  right: 6px;
+  font-size: 15px;
+  filter: none;
+  opacity: 1;
+}
+
+.verzameling-telling {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #9a97a8;
+  text-align: center;
+}
+
+.scorebord-dier {
+  font-size: 48px;
+  line-height: 1;
+  width: 52px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.speler-chip-dier {
+  font-size: 36px;
+  line-height: 1;
+}
+
+
+/* ---------- Poppetje: getekend dier + accessoires (SVG, zie poppetjes.js) ---------- */
+
+/* De grootte van het poppetje volgt de lettergrootte van de plek waar hij staat. */
+.poppetje {
+  display: inline-block;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.dier-knop .poppetje-svg {
+  margin: 0 auto;
+}
+
+.poppetje-svg {
+  display: block;
+  width: 1em;
+  height: 1.05em;
+  overflow: visible;
+}
+
+/* Tabbladen "Dieren" en "Accessoires" in de wachtkamer */
+.kiezer-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.kiezer-tab {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 2px solid #4a3c1a;
+  background: #10152e;
+  color: #f2f2f5;
   font: inherit;
-  color: inherit;
-}
-.lang-card { border-bottom: 6px solid; border-color: transparent transparent var(--card) transparent; }
-.lang-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(40, 30, 120, 0.18); }
-.flag { font-size: 4rem; line-height: 1; }
-.lang-name { font-size: 1.4rem; font-weight: 800; }
-.lang-sub { font-size: 0.85rem; color: var(--muted); }
-
-.back {
-  background: none; border: none; font: inherit; color: var(--muted);
-  cursor: pointer; padding: 8px 4px; font-weight: 700;
-}
-.back:hover { color: var(--text); }
-
-.level-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-.level {
-  display: flex; align-items: center; gap: 16px;
-  background: var(--card); border: none; border-radius: 18px; padding: 16px 18px;
-  box-shadow: 0 4px 14px rgba(40, 30, 120, 0.08);
-  text-align: left; font: inherit; color: inherit; cursor: pointer;
-  border-left: 8px solid var(--accent);
-  transition: transform 0.15s;
-}
-.level:hover:not(.locked) { transform: translateX(4px); }
-.level.locked { opacity: 0.55; cursor: not-allowed; border-left-color: #c9c8d8; }
-.level-icon { font-size: 2rem; width: 44px; text-align: center; }
-.level-info { display: flex; flex-direction: column; gap: 2px; }
-.level-stars { color: #f5a623; letter-spacing: 2px; font-size: 1rem; }
-.level.locked .level-stars { color: var(--muted); letter-spacing: 0; font-size: 0.85rem; }
-.level-stars.big { font-size: 2.2rem; margin: 4px 0 12px; }
-
-.lesson-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.bar { flex: 1; height: 14px; background: #dcd9f3; border-radius: 99px; overflow: hidden; }
-.bar-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s; }
-.counter { font-weight: 800; color: var(--muted); font-size: 0.9rem; }
-
-.card {
-  background: var(--card); border-radius: 24px; padding: 28px 22px;
-  box-shadow: 0 8px 24px rgba(40, 30, 120, 0.1);
-}
-.question { text-align: center; }
-.prompt-label { color: var(--muted); margin: 0 0 12px; }
-.word-big { font-size: 2.6rem; font-weight: 800; margin-bottom: 24px; }
-.speak { background: none; border: none; font-size: 1.6rem; cursor: pointer; vertical-align: middle; }
-
-.options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.option {
-  padding: 16px 10px; font: inherit; font-size: 1.1rem; font-weight: 700;
-  background: #fff; color: var(--text); border: 2px solid #d9d6f0; border-radius: 16px;
-  cursor: pointer; transition: border-color 0.15s, background 0.15s;
-}
-.option:hover:not(:disabled) { border-color: var(--accent); background: #faf9ff; }
-.option.right { background: #dcf7ea; border-color: var(--good); }
-.option.wrong { background: #fde4e5; border-color: var(--bad); }
-.option:disabled { cursor: default; }
-
-#type-form { display: flex; flex-direction: column; gap: 12px; }
-#type-input {
-  padding: 16px; font: inherit; font-size: 1.3rem; text-align: center;
-  border: 2px solid #d9d6f0; border-radius: 16px; outline: none;
-}
-#type-input:focus { border-color: var(--accent); }
-#type-input.right { background: #dcf7ea; border-color: var(--good); }
-#type-input.wrong { background: #fde4e5; border-color: var(--bad); }
-
-.primary, .secondary {
-  padding: 14px 24px; font: inherit; font-weight: 800; font-size: 1rem;
-  border-radius: 16px; border: none; cursor: pointer;
-}
-.primary { background: var(--accent); color: #fff; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18); }
-.primary:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); }
-.secondary { background: #ece9fb; color: var(--text); }
-
-.feedback { margin-top: 20px; min-height: 8px; }
-.feedback p { margin: 0 0 12px; font-weight: 700; }
-.feedback .good { color: var(--good); }
-.feedback .bad { color: var(--bad); }
-
-.result { text-align: center; }
-.big-emoji { font-size: 4rem; }
-.result h2 { margin: 8px 0 4px; font-size: 1.8rem; }
-.score { font-size: 1.2rem; font-weight: 700; margin: 0; }
-.row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
-
-@media (max-width: 480px) {
-  .hero h1 { font-size: 2rem; }
-  .word-big { font-size: 2.1rem; }
-  .options { grid-template-columns: 1fr; }
+  font-weight: 600;
+  cursor: pointer;
 }
 
-/* ---------- Blokken ---------- */
-.block { margin-top: 28px; }
-.block-title { margin: 0 0 2px; font-size: 1.3rem; }
-.block-sub { margin: 0 0 4px; color: var(--muted); font-size: 0.9rem; }
-.block.locked { opacity: 0.6; padding: 14px 18px; background: rgba(255,255,255,0.6); border-radius: 18px; }
-.block.locked .block-sub { margin: 0; }
+.kiezer-tab:hover {
+  border-color: #b8863c;
+}
 
-/* ---------- Zinnen ---------- */
-.word-big.sentence { font-size: 1.6rem; line-height: 1.3; }
-.options.long { grid-template-columns: 1fr; }
-.options.long .option { text-align: left; }
-.answer-line {
-  min-height: 62px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center;
-  padding: 10px; margin-bottom: 14px; border-bottom: 3px dashed #d9d6f0;
+.kiezer-tab.actief {
+  border-color: #f0c04d;
+  background: #1c1a33;
+  color: #f0c04d;
+  box-shadow: 0 0 0 2px rgba(240, 192, 77, 0.3);
 }
-.answer-line.right { border-bottom-color: var(--good); background: #eefaf4; border-radius: 12px; }
-.answer-line.wrong { border-bottom-color: var(--bad); background: #fef0f0; border-radius: 12px; }
-.bank { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 18px; min-height: 48px; }
-.chip {
-  padding: 10px 14px; font: inherit; font-size: 1.05rem; font-weight: 700; color: var(--text);
-  background: #fff; border: 2px solid #d9d6f0; border-radius: 12px; cursor: pointer;
-  box-shadow: 0 3px 0 #d9d6f0; transition: transform 0.1s;
-}
-.chip:hover:not(:disabled) { border-color: var(--accent); }
-.chip.used { opacity: 0.25; box-shadow: none; cursor: default; }
-.chip.chosen { background: #faf9ff; }
-.chip:disabled { cursor: default; }
-.primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 
-/* ---------- Gesprekken ---------- */
-.chat { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; text-align: left; }
-.bubble {
-  max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 1.05rem; line-height: 1.35;
+.kiezer-groep-titel {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #9a97a8;
+  text-align: left;
 }
-.bubble.them { align-self: flex-start; background: #ece9fb; border-bottom-left-radius: 4px; }
-.bubble.you { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
-.bubble.current { font-weight: 800; font-size: 1.2rem; }
-.speak.small { font-size: 1.1rem; }
-.tr { display: none; font-weight: 400; font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
-.option .tr { color: var(--muted); }
-.show-hint .tr { display: block; }
-.option { display: flex; flex-direction: column; gap: 2px; align-items: stretch; }
-.hint-btn {
-  margin-top: 14px; background: none; border: none; font: inherit; font-weight: 700;
-  color: var(--muted); cursor: pointer; text-decoration: underline;
+
+.kiezer-hint {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #9a97a8;
+  text-align: center;
 }
-.feedback .note { font-weight: 400; color: var(--muted); font-size: 0.95rem; }
+
+.kiezer-weg-knop {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 2px solid #4a3c1a;
+  background: #10152e;
+  color: #ffb0bc;
+  font: inherit;
+  cursor: pointer;
+}
+
+.kiezer-weg-knop:hover {
+  border-color: #ff5c72;
+  background: #1c1a33;
+}
+
+/* ---------- Sitebeheer: aangepaste poppetjes ---------- */
+/* Emoji-kiezer: klik op een emoji om meteen een nieuw poppetje/accessoire
+   te maken en aan de kist toe te voegen — geen apart scherm meer nodig.
+   De knoppen tekenen een echt poppetje-voorbeeld (net als de knoppen
+   hierboven), in plaats van kaal emoji-tekst, zodat het altijd goed
+   getekend wordt, ook als een apparaat geen kleuremoji's kan tonen. */
+.dieren-kiezer.accessoires.emoji-kiezer {
+  max-width: none;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid #4a3c1a;
+  border-radius: 14px;
+  background: #080d26;
+}
+
+.emoji-knop {
+  border-style: dashed;
+}
+
+.emoji-knop:hover {
+  transform: scale(1.06);
+}
+
+.plek-kiezer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 10px;
+}
+
+.plek-knop {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 2px solid #4a3c1a;
+  background: #10152e;
+  color: #f0c04d;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.plek-knop.actief {
+  border-color: #f0c04d;
+  background: #1c1a33;
+  box-shadow: 0 0 0 2px rgba(240, 192, 77, 0.4);
+}
+
+
+/* ---------- Vrienden, chat en dubbele verzameling ---------- */
+.vak-vrienden {
+  border-color: #6d4fc2;
+}
+.vrienden-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 20px;
+}
+.vriend-zoekresultaat,
+.vriend-rij {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #10152e;
+  border: 1px solid #3b3558;
+  border-radius: 12px;
+}
+.vriend-zoekresultaat strong,
+.vriend-rij strong {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.vriend-mini-poppetje {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vriend-mini-poppetje svg { width: 44px; height: 44px; }
+.sociaal-overlay { z-index: 900; }
+.sociaal-venster {
+  width: min(560px, 94vw);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+.chat-berichten {
+  height: min(48vh, 420px);
+  overflow-y: auto;
+  padding: 10px;
+  background: #090d20;
+  border: 1px solid #3b3558;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+.chat-bericht {
+  margin: 6px 0;
+  padding: 8px 10px;
+  background: #171b39;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+.chat-bericht.eigen {
+  background: #2b2450;
+}
+.chat-invoer { display: flex; gap: 8px; margin-bottom: 10px; }
+.chat-invoer input { flex: 1; min-width: 0; }
+.stuur-vriend-knop { width: 100%; text-align: left; }
+.verzameling-item { position: relative; overflow: visible; }
+.verzameling-item .dier-knop-badge {
+  top: 2px;
+  right: 4px;
+}
+.verzameling-item.in-bezit { cursor: pointer; }
+.verzameling-item.in-bezit:hover { transform: translateY(-1px); }
+.verzameling-slot { font-size: 30px; opacity: .45; }
+@media (max-width: 520px) {
+  .vriend-zoekresultaat, .vriend-rij { align-items: flex-start; flex-wrap: wrap; }
+  .vriend-zoekresultaat .btn, .vriend-rij .btn { width: 100%; }
+  .vriend-mini-poppetje { width: 38px; height: 38px; }
+  .vriend-mini-poppetje svg { width: 38px; height: 38px; }
+  .chat-invoer { flex-direction: column; }
+  .chat-invoer .btn { width: 100%; }
+}
+
+
+/* ---------- Vriendenbalk naast profiel ---------- */
+.bovenbalk-knoppen {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vrienden-badge {
+  height: 46px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #4a3c1a;
+  border-radius: 999px;
+  background: #10152e;
+  color: #e6cd8f;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+.vrienden-badge:hover { border-color: #f0c04d; color: #f0c04d; }
+.vrienden-badge-aantal {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f0c04d;
+  color: #16120a;
+  font-size: 11px;
+  font-weight: 900;
+}
+.vrienden-badge-aantal[hidden] { display: none; }
+.vrienden-venster { max-width: 520px; }
+.vrienden-hoofdknoppen { display: flex; gap: 8px; }
+.vrienden-toevoegen-paneel {
+  padding: 12px;
+  border: 1px solid #3b3558;
+  border-radius: 14px;
+  background: #0f1430;
+}
+.vrienden-zoekrij { display: flex; gap: 8px; align-items: stretch; }
+.vrienden-zoekrij .zoekbalk { flex: 1; min-width: 0; }
+.vrienden-sectie-titel { margin: 10px 0 4px; }
+
+/* ---------- Profiel poppetje aanpassen: logisch naast elkaar ---------- */
+.profiel-venster { width: min(520px, 94vw); }
+.profiel-kiezer-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin: 4px 0 12px;
+}
+.profiel-kiezer-tab { min-height: 42px; }
+.profiel-dieren-kiezer {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: none;
+  margin-top: 0;
+}
+.profiel-dieren-kiezer .dier-knop { min-width: 0; aspect-ratio: 1; }
+.profiel-dieren-kiezer .kiezer-groep-titel,
+.profiel-dieren-kiezer .kiezer-hint,
+.profiel-dieren-kiezer .kiezer-weg-knop { grid-column: 1 / -1; }
+@media (max-width: 520px) {
+  .bovenbalk-knoppen { top: 8px; right: 8px; gap: 6px; }
+  .vrienden-badge { height: 42px; padding: 0 10px; }
+  .vrienden-badge span:nth-child(2) { display: none; }
+  .profiel-badge { position: static; }
+  .profiel-dieren-kiezer { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .profiel-dieren-kiezer.accessoires { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .vrienden-zoekrij { flex-direction: column; }
+  .vrienden-zoekrij .btn { width: 100%; }
+}
+
+/* ---------- Definitieve bovenbalk vrienden + profiel ---------- */
+.bovenbalk-knoppen {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  background: rgba(16, 21, 46, 0.96);
+  border: 1px solid #3b3558;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.22);
+  backdrop-filter: blur(8px);
+}
+.bovenbalk-knoppen .vrienden-badge {
+  border-color: transparent;
+  background: transparent;
+}
+.bovenbalk-knoppen .profiel-badge {
+  border-color: #4a3c1a;
+}
+@media (max-width: 520px) {
+  .bovenbalk-knoppen {
+    top: 8px;
+    right: 8px;
+    gap: 5px;
+    padding: 4px;
+  }
+}
+
+
+/* ---------- Beeldvullende chat ---------- */
+body.chat-open { overflow: hidden; }
+.chat-scherm {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--chat-achtergrond, #090d20);
+  color: #fff;
+}
+.chat-scherm.actief { display: flex; }
+.chat-kop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  background: rgba(10, 12, 30, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  flex: 0 0 auto;
+}
+.chat-kop h3 { flex: 1; margin: 0; font-size: 1.15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-kop-knop {
+  width: 44px; height: 44px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 12px;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+.chat-kop-knop:hover { background: rgba(255,255,255,.2); }
+.chat-scherm .chat-berichten {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 14px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-scherm .chat-bericht {
+  max-width: min(78%, 560px);
+  align-self: flex-start;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 16px 16px 16px 4px;
+  background: var(--chat-ander-vak, rgba(43, 43, 69, 0.94));
+  color: var(--chat-ander-tekst, #fff);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.chat-scherm .chat-bericht.eigen {
+  align-self: flex-end;
+  border-radius: 16px 16px 4px 16px;
+  background: var(--chat-eigen-vak, rgba(109, 79, 194, 0.94));
+  color: var(--chat-eigen-tekst, #fff);
+}
+.chat-bericht-naam { font-size: .75rem; font-weight: 700; opacity: .8; }
+.chat-bericht-tekst { overflow-wrap: anywhere; line-height: 1.35; }
+.chat-poppetje-bericht { align-items: center; text-align: center; gap: 6px !important; padding: 10px 14px !important; }
+.chat-poppetje-bericht .chat-bericht-naam { align-self: flex-start; }
+.chat-poppetje-plaatje svg { width: 110px; height: 110px; }
+.chat-poppetje-label { font-weight: 700; }
+.chat-poppetje-status { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; font-size: .9rem; }
+.chat-poppetje-status .btn { padding: 8px 12px; }
+
+.chat-scherm .chat-invoer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  background: rgba(10, 12, 30, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.chat-scherm .chat-invoer input { flex: 1; min-width: 0; height: 46px; }
+.chat-scherm .chat-invoer .btn { width: auto; height: 46px; }
+.chat-poppetje-knop {
+  position: relative;
+  flex: 0 0 auto;
+  width: 52px; height: 46px;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 12px;
+  background: rgba(255,255,255,.12);
+  cursor: pointer;
+  padding: 0;
+}
+.chat-poppetje-knop:hover { background: rgba(255,255,255,.22); }
+.chat-poppetje-knop-plaatje { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; }
+.chat-poppetje-knop-plaatje svg { width: 34px; height: 34px; }
+.chat-poppetje-knop-plus {
+  position: absolute; right: -4px; bottom: -4px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #f0c04d; color: #10152e;
+  font: 800 16px/20px 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+}
+
+.chat-paneel {
+  flex: 0 0 auto;
+  padding: 12px;
+  background: rgba(10, 12, 30, 0.9);
+  color: #fff;
+  border-top: 1px solid rgba(255,255,255,.15);
+  max-height: 45vh;
+  overflow-y: auto;
+}
+.chat-paneel[hidden] { display: none; }
+.chat-stijl-paneel { border-top: 0; border-bottom: 1px solid rgba(255,255,255,.15); }
+.chat-paneel-titel { margin: 4px 0 8px; font-weight: 700; }
+.chat-keuzes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; align-items: center; }
+.chat-achtergrond-keuze, .chat-kleur-keuze {
+  width: 46px; height: 46px;
+  border: 3px solid rgba(255,255,255,.35);
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+.chat-kleur-keuze { border-radius: 50%; width: 38px; height: 38px; }
+.chat-achtergrond-keuze.actief, .chat-kleur-keuze.actief { border-color: #f0c04d; box-shadow: 0 0 0 2px rgba(240,192,77,.5); }
+.chat-kleur-eigen { width: 42px; height: 38px; border: 0; padding: 0; background: none; cursor: pointer; }
+
+.chat-poppetjes-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
+.chat-tab {
+  flex: 1; padding: 8px; border-radius: 10px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; font-weight: 700;
+}
+.chat-tab.actief { background: #f0c04d; color: #10152e; border-color: #f0c04d; }
+.chat-poppetjes-lijst { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.chat-poppetjes-lijst .dier-knop { width: 72px; height: 72px; }
+.chat-poppetjes-lijst .dier-knop svg { width: 100%; height: 100%; }
+.chat-poppetjes-lijst .dier-knop.gekozen { border-color: #f0c04d; box-shadow: 0 0 0 2px rgba(240,192,77,.5); }
+.chat-poppetjes-lijst .dier-knop:disabled { opacity: .4; cursor: not-allowed; }
+.chat-poppetjes-actie { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.chat-poppetjes-keuze { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 520px) {
+  .chat-scherm .chat-bericht { max-width: 88%; }
+  .chat-scherm .chat-invoer .btn { padding: 0 14px; }
+}
+
+
+/* ---------- Gebruikersnaam wijzigen ---------- */
+.profiel-naam-paneel { display: flex; flex-direction: column; gap: 8px; width: 100%; margin: 8px 0; }
+.profiel-naam-paneel[hidden] { display: none; }
+
+
+/* ---------- Chat: berichten verwijderen ---------- */
+.chat-bericht-kop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.chat-poppetje-bericht .chat-bericht-kop { align-self: stretch; }
+.chat-bericht-verwijder {
+  border: 0; background: none; color: inherit; cursor: pointer;
+  font-size: .9rem; line-height: 1; padding: 2px 4px; opacity: .6;
+}
+.chat-bericht-verwijder:hover { opacity: 1; }
+
+/* ---------- Poppetje wijzigen (beeldvullend) ---------- */
+.poppetje-editor {
+  display: none;
+  position: fixed; inset: 0; z-index: 1200;
+  flex-direction: column;
+  height: 100vh; height: 100dvh;
+  background: linear-gradient(180deg, #10152e, #1c1a33);
+  color: #fff;
+}
+.poppetje-editor.actief { display: flex; }
+.pe-voorbeeld {
+  flex: 0 0 auto;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 14px 12px 10px;
+  background: radial-gradient(circle at 50% 40%, rgba(240,192,77,.18), transparent 65%);
+}
+.pe-voorbeeld-poppetje { width: min(38vh, 180px); height: min(38vh, 180px); line-height: 0; }
+.pe-voorbeeld-poppetje svg { width: 100%; height: 100%; overflow: visible; }
+.pe-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.pe-chip {
+  border: 1px solid #f0c04d; background: rgba(240,192,77,.12); color: #f0c04d;
+  border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.pe-chip:hover { background: rgba(240,192,77,.25); }
+.pe-chips-leeg { font-size: 13px; color: #9a97a8; }
+.pe-tabs {
+  flex: 0 0 auto;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
+  padding: 0 12px 10px;
+}
+.pe-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  border: 1px solid #4a3c1a; background: #10152e; color: #9a97a8;
+  border-radius: 12px; padding: 8px 4px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.pe-tab-icoon { font-size: 22px; line-height: 1; }
+.pe-tab.actief { border-color: #f0c04d; color: #f0c04d; background: #1c1a33; }
+.pe-inhoud {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  padding: 4px 12px calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+.pe-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; padding-top: 10px; }
+.pe-kaart {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 4px; border-radius: 14px;
+  border: 2px solid #4a3c1a; background: #10152e; color: #fff; cursor: pointer; font: inherit;
+}
+.pe-kaart:hover { border-color: #b8863c; background: #1c1a33; }
+.pe-kaart.gekozen { border-color: #f0c04d; background: #1c1a33; box-shadow: 0 0 0 2px rgba(240,192,77,.4), 0 0 16px rgba(240,192,77,.25); }
+.pe-kaart-plaat { width: 100%; aspect-ratio: 1; line-height: 0; }
+.pe-kaart-plaat svg { width: 100%; height: 100%; overflow: visible; }
+.pe-kaart-label { font-size: 12px; font-weight: 700; text-align: center; overflow-wrap: anywhere; }
+.pe-vink {
+  position: absolute; top: 4px; right: 4px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #f0c04d; color: #10152e; font: 800 14px/22px 'Segoe UI', Arial, sans-serif; text-align: center;
+}
+.pe-hint { margin: 14px 0 0; font-size: 12px; color: #9a97a8; text-align: center; }
+@media (max-width: 520px) {
+  .pe-raster { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+
+/* ---------- Cijfertje bij de chat (ongelezen berichten) ---------- */
+.vriend-rij .chat-knop { position: relative; overflow: visible; }
+.chat-knop-badge {
+  position: absolute; top: -8px; right: -8px;
+  min-width: 22px; height: 22px; padding: 0 6px;
+  border-radius: 999px; box-sizing: border-box;
+  background: #ff5c72; color: #fff;
+  font: 800 13px/22px 'Segoe UI', Arial, sans-serif; text-align: center;
+  box-shadow: 0 0 0 2px #10152e;
+}
+
+
+/* ---------- Quiz sturen in de chat ---------- */
+.chat-paneel-uitleg { margin: 0 0 10px; font-size: 13px; color: #b9b6c9; }
+.chat-quiz-lijst { display: flex; flex-direction: column; gap: 8px; }
+.chat-quiz-rij {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px; border-radius: 12px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+}
+.chat-quiz-plaat { width: 64px; height: 36px; object-fit: cover; border-radius: 8px; flex: 0 0 auto; }
+.chat-quiz-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.chat-quiz-info strong { overflow-wrap: anywhere; }
+.chat-quiz-info span { font-size: 12px; color: #b9b6c9; }
+.chat-quiz-rij .btn { flex: 0 0 auto; padding: 8px 12px; }
+.chat-quiz-icoon { font-size: 44px; line-height: 1; }
+.chat-quiz-sub { font-size: 12px; opacity: .8; }
+
+
+/* Profielpoppetjes bij namen in de chat en vriendenlijst */
+.chat-kop-poppetje { width: 40px; height: 40px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+.chat-kop-poppetje svg { width: 40px; height: 40px; }
+.chat-bericht-poppetje { width: 26px; height: 26px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; }
+.chat-bericht-poppetje svg { width: 26px; height: 26px; }
+.chat-bericht-naam { display: inline-flex; align-items: center; gap: 6px; }
+.mini-poppetje-leeg { opacity: .6; }
+
+
+/* Dierenverzameling: tabbladen Dieren / Hoeden / Brillen / Extra (zelfde look als "Poppetje wijzigen") */
+.verzameling-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto 12px;
+}
+
+
+/* Winkel: kisten gegroepeerd in Nu te koop / Komt binnenkort / Gepland / Offline */
+.winkel-secties {
+  display: block;
+  grid-template-columns: none;
+}
+.winkel-groep {
+  background: #0c1130;
+  border: 1px solid #4a3c1a;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin: 0 0 14px;
+}
+.winkel-groep summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #f0c04d;
+  user-select: none;
+}
+.winkel-groep summary::-webkit-details-marker { display: none; }
+.winkel-groep summary::after { content: '▸'; color: #e6cd8f; margin-left: 4px; }
+.winkel-groep[open] summary::after { content: '▾'; }
+.winkel-groep-titel { flex: 1; text-align: left; }
+.winkel-groep-aantal {
+  min-width: 26px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #f0c04d;
+  color: #10152e;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+.winkel-groep-uitleg {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #9a97a8;
+  text-align: left;
+}
+.winkel-groep-raster { margin-top: 12px; }
+.winkel-groep-online  { border-color: #2f7d4f; }
+.winkel-groep-komt    { border-color: #b8863c; }
+.winkel-groep-gepland { border-color: #5a63c9; }
+.winkel-groep-offline { border-color: #6b3a45; }
+.winkel-groep-offline .winkel-groep-aantal { background: #ff5c72; color: #fff; }
+
+
+/* ---------- Vriend verwijderen ---------- */
+.vriend-knoppen { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.vriend-verwijder-knop { padding-left: 12px; padding-right: 12px; }
+.vriend-verwijder-knop:hover { border-color: #ff5c72; }
+@media (max-width: 520px) {
+  .vriend-rij .vriend-knoppen { width: 100%; }
+  .vriend-rij .vriend-knoppen .chat-knop { flex: 1; }
+  .vriend-rij .vriend-knoppen .vriend-verwijder-knop { width: auto; flex: 0 0 auto; }
+}
+
+
+/* ===== Beheerder: instellingen-logo, "Beheerder" met kleine naam, chatwaarschuwing ===== */
+.beheer-logo-svg { display: block; }
+.beheer-echte-naam {
+  display: block; font-size: .72em; font-weight: 400; line-height: 1.2; opacity: .75;
+  white-space: normal; overflow: hidden; text-overflow: ellipsis;
+}
+.chat-kop h3 .beheer-echte-naam { font-size: .62em; }
+.chat-beheer-melding {
+  flex: 0 0 auto; margin: 8px 12px 0; padding: 10px 14px; border-radius: 12px; text-align: center;
+  font-weight: 800; color: #fff; background: #000; border: 1px solid #555;
+}
+.chat-beheer-melding.geblokkeerd { color: #fff; background: #b3243a; border-color: #ff5c72; }
+.chat-beheer-melding[hidden], .chat-kop-knop[hidden], .vriend-verwijder-knop[hidden] { display: none !important; }
+.chat-scherm .chat-invoer input:disabled, .chat-scherm .chat-invoer button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ===== Emoties in de chat ===== */
+.chat-emoji-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 6px; }
+.chat-emoji-keuze {
+  height: 46px; font-size: 26px; line-height: 1; cursor: pointer; padding: 0;
+  border: 1px solid rgba(255,255,255,.2); border-radius: 12px; background: rgba(255,255,255,.08);
+}
+.chat-emoji-keuze:hover, .chat-emoji-keuze:active { background: rgba(255,255,255,.22); }
+.chat-bericht.alleen-emoji .chat-bericht-tekst { font-size: 2.4rem; line-height: 1.15; }
+
+/* ===== Een bericht beantwoorden ===== */
+.chat-bericht-acties { display: inline-flex; align-items: center; gap: 4px; }
+.chat-bericht-antwoord { font-size: 1.05rem; }
+.chat-citaat {
+  margin: 4px 0 6px; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+  border-left: 4px solid #8f98ff; background: rgba(128, 128, 128, .22);
+  display: flex; flex-direction: column; gap: 2px; font-size: .88rem; line-height: 1.25;
+}
+.chat-citaat strong { font-size: .8rem; opacity: .9; }
+.chat-citaat span { opacity: .85; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.chat-citaat .beheer-echte-naam { display: inline; margin-left: 4px; }
+.chat-bericht-licht { animation: chat-licht 1.4s ease-out; }
+@keyframes chat-licht { 0%, 40% { box-shadow: 0 0 0 4px #8f98ff; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.chat-antwoord-balk {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  background: rgba(10, 12, 30, .92); color: #fff; border-top: 1px solid rgba(255,255,255,.15);
+}
+.chat-antwoord-balk[hidden] { display: none; }
+.chat-antwoord-inhoud { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding-left: 10px; border-left: 4px solid #8f98ff; font-size: .9rem; }
+.chat-antwoord-inhoud span { opacity: .8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-antwoord-sluit { width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255,255,255,.14); color: #fff; font-size: 1rem; cursor: pointer; }
+
+/* ===== Bezoekmodus (sitebeheer bekijkt een account) ===== */
+.bezoek-balk {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 5000; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 6px;
+  background: #b3243a; color: #fff; font-size: .85rem; font-weight: 700; line-height: 1.2;
+}
+.bezoek-balk button {
+  flex: 0 0 auto; border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer;
+  background: #fff; color: #b3243a; font: inherit; font-weight: 800;
+}
+body.bezoek-modus { padding-top: calc(52px + env(safe-area-inset-top, 0px)); }
+/* Vrienden en chat blijven zichtbaar in de bezoekmodus; alles schuift alleen onder de rode balk vandaan. */
+body.bezoek-modus .bovenbalk-knoppen { top: calc(62px + env(safe-area-inset-top, 0px)); }
+body.bezoek-modus .sitebeheer-overlay,
+body.bezoek-modus .poppetje-editor,
+body.bezoek-modus .chat-scherm { top: calc(52px + env(safe-area-inset-top, 0px)); }
+html.breed body.bezoek-modus .telefoon-nav { top: calc(52px + env(safe-area-inset-top, 0px)) !important; }
+
+
+/* Waarschuwing van sitebeheer in de chat (voor beide kanten zichtbaar) */
+.chat-waarschuwing {
+  align-self: stretch; position: relative; margin: 6px 0; padding: 12px 40px 12px 14px;
+  border-radius: 14px; text-align: center; color: #fff;
+  background: #b3243a; border: 2px solid #ff5c72; box-shadow: 0 4px 16px rgba(179, 36, 58, .45);
+}
+.chat-waarschuwing-titel { font-weight: 800; font-size: .95rem; margin-bottom: 4px; }
+.chat-waarschuwing-tekst { overflow-wrap: anywhere; line-height: 1.35; white-space: pre-wrap; }
+.chat-waarschuwing-weg { position: absolute; top: 8px; right: 8px; color: #fff; }
+
+
+/* Sitebeheer: verdienlijst */
+.verdien-blok { display: flex; flex-direction: column; gap: 8px; padding: 12px; margin-bottom: 10px; border-radius: 14px; background: rgba(16, 21, 46, .9); border: 1px solid #4a3c1a; }
+.verdien-blok h4 { margin: 0; color: #f0c04d; }
+.verdien-rij { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.verdien-getal { width: 90px; text-align: center; }
+.verdien-weg { flex: 0 0 auto; width: auto !important; min-height: 44px; padding: 0 14px; }
+
+/* ---------- Munten sturen in de chat ---------- */
+.chat-munten-snel { display: flex; gap: 8px; flex-wrap: wrap; }
+.chat-munten-snel .btn { flex: 1 1 60px; padding: 8px 10px; }
+.chat-munten-actie { display: flex; gap: 8px; align-items: center; }
+.chat-munten-actie input { flex: 1; min-width: 0; }
+.chat-munten-actie .btn { flex: 0 0 auto; }
+
+/* ---------- Groepen ---------- */
+.groep-overlay { z-index: 1200; }
+.chat-groep-aan { display: flex; align-items: center; gap: 10px; }
+.chat-groep-aan[hidden] { display: none; }
+.chat-groep-aan select { flex: 1; min-width: 0; }
+.groep-kies-rij { cursor: pointer; }
+.groep-kies-rij input[type="checkbox"] { width: 22px; height: 22px; min-height: 0; flex: 0 0 auto; accent-color: #f0c04d; }
+
+.groep-foto-rij { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.groep-foto-voorbeeld { width: 84px; height: 84px; display: flex; align-items: center; justify-content: center; font-size: 2.6rem; flex: 0 0 auto; }
+.groep-foto-voorbeeld svg { width: 84px; height: 84px; overflow: visible; }
+.groep-foto-knoppen { display: flex; flex-direction: column; gap: 8px; flex: 1 1 200px; }
+
+.beheer-poppetje-overlay { z-index: 1200; }
