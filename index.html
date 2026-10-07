@@ -12,17 +12,22 @@
     <span id="sync-status"></span>
   </header>
   <main id="app"></main>
-  <script type="module" src="app.js"></script>
+
   <script>
-    // Als app.js niet start (bijvoorbeeld bij dubbelklikken op index.html), laat dan een duidelijke melding zien.
-    setTimeout(function () {
-      if (!window.__taalreisStarted) {
-        document.getElementById("app").innerHTML =
-          '<p style="text-align:center;padding:40px 10px">De site kan niet starten. ' +
-          'Open hem via een webserver (bijvoorbeeld GitHub Pages of <code>python3 -m http.server</code>) ' +
-          'en controleer of alle bestanden naast elkaar staan.</p>';
+    // Laat een echte foutmelding zien als er iets misgaat, in plaats van een leeg scherm.
+    window.addEventListener("error", function (e) {
+      var el = document.getElementById("app");
+      if (el && !el.children.length) {
+        var p = document.createElement("p");
+        p.style.cssText = "text-align:center;padding:40px 10px";
+        p.textContent = "Er ging iets mis: " + (e.message || "onbekende fout") +
+          (e.filename ? " (" + e.filename.split("/").pop() + ")" : "") +
+          ". Controleer of data.js, app.js en style.css naast index.html staan.";
+        el.appendChild(p);
       }
-    }, 2500);
+    });
   </script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
