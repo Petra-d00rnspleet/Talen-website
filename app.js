@@ -7332,64 +7332,92 @@ let bezoekProfiel_ = null;   // {uid, naam}
 
 
 // ---------- Sitebeheer: naam en poppetje van iemand anders aanpassen ----------
+let beheerNaamUid = '';
+
 function wijzigNaamAlsBeheer(knop) {
   if (!sitebeheerActief) return;
-  const uid = knop.dataset.uid;
-  const p = beheerProfielen.find(x => x.uid === uid);
+  const p = beheerProfielen.find(x => x.uid === knop.dataset.uid);
   if (!p) return;
-  const fout = document.getElementById('beheer-profielen-fout');
-  fout.textContent = '';
-  const antwoord = prompt('Nieuwe gebruikersnaam voor "' + p.naam + '":', p.naam);
-  if (antwoord === null) return;
-  const nieuweNaam = String(antwoord).trim().replace(/\s+/g, ' ').slice(0, 30);
-  if (!nieuweNaam) { fout.textContent = 'Vul een gebruikersnaam in.'; return; }
-  if (nieuweNaam === p.naam) return;
+  beheerNaamUid = p.uid;
+  document.getElementById('beheer-naam-titel').textContent = 'Naam van ' + p.naam + ' wijzigen';
+  const invoer = document.getElementById('input-beheer-naam');
+  invoer.value = p.naam;
+  document.getElementById('beheer-naam-status').textContent = '';
+  document.getElementById('btn-beheer-naam-opslaan').disabled = false;
+  document.getElementById('beheer-naam-overlay').classList.add('actief');
+  setTimeout(() => { invoer.focus(); invoer.select(); }, 50);
+}
+
+function slaBeheerNaamOp() {
+  const uid = beheerNaamUid;
+  const p = beheerProfielen.find(x => x.uid === uid);
+  const status = document.getElementById('beheer-naam-status');
+  const knop = document.getElementById('btn-beheer-naam-opslaan');
+  status.textContent = '';
+  if (!sitebeheerActief || !p) { status.textContent = 'Je bent geen sitebeheer meer, of dit profiel bestaat niet meer.'; return; }
+  const nieuweNaam = String(document.getElementById('input-beheer-naam').value || '').trim().replace(/\s+/g, ' ').slice(0, 30);
+  if (!nieuweNaam) { status.textContent = 'Vul een gebruikersnaam in.'; return; }
+  if (nieuweNaam === p.naam) { status.textContent = 'Dit is al de naam.'; return; }
   const oudeNaam = p.naam;
   const nieuweZoek = normaliseerGebruikersnaam(nieuweNaam);
   const oudeZoek = normaliseerGebruikersnaam(oudeNaam);
   knop.disabled = true;
-  (nieuweZoek === oudeZoek ? Promise.resolve() : naamRegistreer(uid, nieuweZoek))
-    .then(() => db.ref(SOCIAAL_PROFIEL_PAD + '/' + uid).update({
+  status.textContent = 'Bezig...';
+  const stap = (naam, belofte) => Promise.resolve(belofte).catch(err => { if (err && !err.stap) err.stap = naam; throw err; });
+
+  stap('namen', nieuweZoek === oudeZoek ? null : naamRegistreer(uid, nieuweZoek))
+    .then(() => stap('profiel (gebruikers/' + uid + ')', db.ref(SOCIAAL_PROFIEL_PAD + '/' + uid).update({
       gebruikersnaam: nieuweNaam,
       gebruikersnaamZoek: nieuweZoek,
       beheerTijd: firebase.database.ServerValue.TIMESTAMP
-    }))
-    .then(() => (oudeZoek && oudeZoek !== nieuweZoek) ? naamVrijgeven(uid, oudeZoek) : null)
-    .then(() => Promise.all([
-      db.ref('vrienden/' + uid).once('value').catch(() => null),
-      db.ref('gebruikerGroepen/' + uid).once('value').catch(() => null),
-      db.ref('accountData/' + uid + '/eigenQuizzen').once('value').catch(() => null)
-    ]))
-    .then(([vs, gs, qs]) => {
-      const upd = {};
-      if (vs) Object.keys(vs.val() || {}).forEach(f => { upd['vrienden/' + f + '/' + uid + '/gebruikersnaam'] = nieuweNaam; });
-      if (gs) Object.keys(gs.val() || {}).forEach(g => { upd['groepen/' + g + '/leden/' + uid] = nieuweNaam; });
-      const taken = [];
-      if (Object.keys(upd).length) taken.push(db.ref().update(upd).catch(() => {}));
-      let quizzen = [];
-      try { quizzen = JSON.parse((qs && qs.val()) || '[]'); } catch (e) {}
-      quizzen.filter(q => q && q.code && !q.gedeeldVan).forEach(q => {
-        taken.push(db.ref('quizzen/' + q.code).once('value').then(snap => {
-          if (!snap.child('titel').exists()) return null;
-          const huidig = snap.child('makerNaam').val();
-          if (!huidig || huidig === oudeNaam) return db.ref('quizzen/' + q.code + '/makerNaam').set(nieuweNaam);
-          return null;
-        }).catch(() => {}));
-      });
-      return Promise.all(taken);
+    })))
+    .then(() => (oudeZoek && oudeZoek !== nieuweZoek) ? naamVrijgeven(uid, oudeZoek).catch(() => {}) : null)
+    .then(() => {
+      // De naam is nu veranderd. De rest is netjes bijwerken; mislukt dat, dan blijft de naam toch veranderd.
+      return Promise.all([
+        db.ref('vrienden/' + uid).once('value').catch(() => null),
+        db.ref('gebruikerGroepen/' + uid).once('value').catch(() => null),
+        db.ref('accountData/' + uid + '/eigenQuizzen').once('value').catch(() => null)
+      ]).then(([vs, gs, qs]) => {
+        const upd = {};
+        if (vs) Object.keys(vs.val() || {}).forEach(f => { upd['vrienden/' + f + '/' + uid + '/gebruikersnaam'] = nieuweNaam; });
+        if (gs) Object.keys(gs.val() || {}).forEach(g => { upd['groepen/' + g + '/leden/' + uid] = nieuweNaam; });
+        const taken = [];
+        if (Object.keys(upd).length) taken.push(db.ref().update(upd).catch(() => {}));
+        let quizzen = [];
+        try { quizzen = JSON.parse((qs && qs.val()) || '[]'); } catch (e) {}
+        quizzen.filter(q => q && q.code && !q.gedeeldVan).forEach(q => {
+          taken.push(db.ref('quizzen/' + q.code).once('value').then(snap => {
+            if (!snap.child('titel').exists()) return null;
+            const huidig = snap.child('makerNaam').val();
+            if (!huidig || huidig === oudeNaam) return db.ref('quizzen/' + q.code + '/makerNaam').set(nieuweNaam);
+            return null;
+          }).catch(() => {}));
+        });
+        return Promise.all(taken);
+      }).catch(() => {});
     })
     .then(() => {
       knop.disabled = false;
       p.naam = nieuweNaam;
       beheerProfielen.sort((a, b) => a.naam.localeCompare(b.naam, 'nl', { sensitivity: 'base' }));
       toonBeheerProfielen();
+      document.getElementById('beheer-naam-titel').textContent = 'Naam van ' + nieuweNaam + ' wijzigen';
+      status.textContent = '✓ De naam is veranderd in "' + nieuweNaam + '".';
     })
     .catch(err => {
       knop.disabled = false;
-      const code = err && err.code ? ' (' + err.code + ')' : '';
-      fout.textContent = 'Naam wijzigen is mislukt' + code + '. Controleer of de nieuwste Firebase-regels zijn gepubliceerd.';
+      const code = err && (err.code || err.message) ? ' (' + (err.code || err.message) + ')' : '';
+      const rechten = String((err && (err.code || err.message)) || '').toUpperCase().indexOf('PERMISSION') !== -1;
+      status.textContent = 'Naam wijzigen is mislukt bij "' + ((err && err.stap) || 'onbekend') + '"' + code + '.' +
+        (rechten ? ' Firebase weigert dit: publiceer de nieuwste regels uit firebase-rules.json en controleer dat dit account echt sitebeheer is.' : '');
     });
 }
+document.getElementById('btn-beheer-naam-opslaan').addEventListener('click', slaBeheerNaamOp);
+document.getElementById('input-beheer-naam').addEventListener('keydown', e => { if (e.key === 'Enter') slaBeheerNaamOp(); });
+document.getElementById('btn-beheer-naam-sluiten').addEventListener('click', () => {
+  document.getElementById('beheer-naam-overlay').classList.remove('actief');
+});
 
 let beheerPopUid = '';
 let beheerPopConcept = null;
