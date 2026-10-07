@@ -2,15 +2,15 @@
 // Elk woord heeft een vertaling in nl, en en fr.
 // Een nieuwe taal toevoegen: voeg hem toe aan LANGUAGES en geef elk woord in LEVELS een extra sleutel.
 
-export const LANGUAGES = {
+const LANGUAGES = {
   en: { name: "Engels", native: "English", flag: "🇬🇧", speech: "en-GB", helper: "nl", color: "#e8505b" },
   nl: { name: "Nederlands", native: "Nederlands", flag: "🇳🇱", speech: "nl-NL", helper: "en", color: "#f39c34" },
   fr: { name: "Frans", native: "Français", flag: "🇫🇷", speech: "fr-FR", helper: "nl", color: "#3b82f6" },
 };
 
-export const HELPER_NAMES = { nl: "Nederlands", en: "Engels" };
+const HELPER_NAMES = { nl: "Nederlands", en: "Engels" };
 
-export const LEVELS = [
+const LEVELS = [
   {
     id: 1,
     title: "Begroetingen",
@@ -89,4 +89,4 @@ export const LEVELS = [
 ];
 
 // Aantal goede antwoorden dat nodig is om een level te halen
-export const PASS_SCORE = 6;
+const PASS_SCORE = 6;
