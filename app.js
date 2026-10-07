@@ -1,9 +1,4 @@
-import { firebaseConfig } from "./firebase-config.js";
-import { LANGUAGES, HELPER_NAMES, LEVELS, PASS_SCORE } from "./data.js";
-
-window.__taalreisStarted = true;
-
-const app = document.getElementById("app");
+const root = document.getElementById("app");
 const syncStatus = document.getElementById("sync-status");
 const LS_KEY = "taalreis-voortgang";
 
@@ -42,8 +37,15 @@ function withTimeout(promise, ms = 8000) {
 }
 
 async function initFirebase() {
-  if (!firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith("JOUW")) {
-    return; // geen Firebase ingesteld: alles blijft lokaal, geen melding nodig
+  // De Firebase-gegevens worden los geladen, zodat de site ook werkt als dat bestand ontbreekt
+  let firebaseConfig;
+  try {
+    ({ firebaseConfig } = await import("./firebase-config.js"));
+  } catch (e) {
+    return; // geen config of geen webserver: alles blijft lokaal
+  }
+  if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith("JOUW")) {
+    return;
   }
   try {
     const v = "10.14.1";
@@ -149,7 +151,7 @@ function render() {
 // ---------- Schermen ----------
 function renderHome() {
   document.body.style.setProperty("--accent", "#6c5ce7");
-  app.innerHTML = `
+  root.innerHTML = `
     <section class="hero">
       <h1>Taalreis 🌍</h1>
       <p>Leer nieuwe woordjes, level voor level. Kies een taal om te beginnen!</p>
@@ -167,7 +169,7 @@ function renderHome() {
         })
         .join("")}
     </section>`;
-  app.querySelectorAll(".lang-card").forEach((b) =>
+  root.querySelectorAll(".lang-card").forEach((b) =>
     b.addEventListener("click", () => go("levels", { lang: b.dataset.lang }))
   );
 }
@@ -175,7 +177,7 @@ function renderHome() {
 function renderLevels() {
   const l = LANGUAGES[state.lang];
   document.body.style.setProperty("--accent", l.color);
-  app.innerHTML = `
+  root.innerHTML = `
     <button class="back" id="back">← Andere taal</button>
     <section class="hero small">
       <h1>${l.flag} ${l.name} voor beginners</h1>
@@ -196,7 +198,7 @@ function renderLevels() {
       }).join("")}
     </section>`;
   document.getElementById("back").addEventListener("click", () => go("home"));
-  app.querySelectorAll(".level:not(.locked)").forEach((b) =>
+  root.querySelectorAll(".level:not(.locked)").forEach((b) =>
     b.addEventListener("click", () => startLesson(Number(b.dataset.level)))
   );
 }
@@ -238,7 +240,7 @@ function renderQuestion() {
       </form>`;
   }
 
-  app.innerHTML = `
+  root.innerHTML = `
     <div class="lesson-top">
       <button class="back" id="quit">✕</button>
       <div class="bar"><div class="bar-fill" style="width:${progressPct}%"></div></div>
@@ -250,7 +252,7 @@ function renderQuestion() {
 
   if (q.type === "choice") {
     document.getElementById("speak").addEventListener("click", () => speak(target, l.speech));
-    app.querySelectorAll(".option").forEach((b) =>
+    root.querySelectorAll(".option").forEach((b) =>
       b.addEventListener("click", () => checkAnswer(b.dataset.answer === helper, helper, b))
     );
   } else {
@@ -270,7 +272,7 @@ function checkAnswer(correct, right, clickedBtn) {
   quiz.answered = true;
   if (correct) quiz.score++;
 
-  app.querySelectorAll(".option").forEach((b) => {
+  root.querySelectorAll(".option").forEach((b) => {
     b.disabled = true;
     if (b.dataset.answer === right) b.classList.add("right");
   });
@@ -317,7 +319,7 @@ function renderResult() {
   const { quiz, level, lang } = state;
   const total = quiz.questions.length;
   const nextLevel = LEVELS.find((l) => l.id === level.id + 1);
-  app.innerHTML = `
+  root.innerHTML = `
     <section class="card result">
       <div class="big-emoji">${quiz.passed ? "🏆" : "💪"}</div>
       <h2>${quiz.passed ? "Level gehaald!" : "Bijna!"}</h2>
