@@ -1,33 +1,906 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Taalreis – leer talen</title>
-  <link rel="stylesheet" href="style.css" />
+<link rel="icon" type="image/png" href="./favicon.png?v=2">
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1130">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <script>
+    // Herkent telefoon, tablet of laptop en zet de juiste indeling aan.
+    (function () {
+      var mq = window.matchMedia('(max-width: 700px), (pointer: coarse) and (max-width: 900px)');
+      var aanraak = window.matchMedia('(pointer: coarse)');
+      function zet() {
+        var h = document.documentElement.classList;
+        h.toggle('telefoon', mq.matches);       // telefoon: onderbalk + tegels
+        h.toggle('breed', !mq.matches);         // laptop en tablet: zijbalk + tegels
+        h.toggle('tablet', !mq.matches && aanraak.matches); // tablet: grotere knoppen
+      }
+      zet();
+      if (mq.addEventListener) mq.addEventListener('change', zet); else if (mq.addListener) mq.addListener(zet);
+    })();
+  </script>
+  <title>Quiz Maker</title>
+  <link rel="stylesheet" href="style.css?v=20261006a">
+  <link rel="stylesheet" href="telefoon.css?v=20261006a">
+  <link rel="stylesheet" href="breed.css?v=20261006a">
+  <link rel="stylesheet" href="account.css?v=20261006a">
 </head>
 <body>
-  <header class="topbar">
-    <a href="./" class="logo">🌍 Taalreis</a>
-    <span id="sync-status"></span>
-  </header>
-  <main id="app"></main>
 
-  <script>
-    // Laat een echte foutmelding zien als er iets misgaat, in plaats van een leeg scherm.
-    window.addEventListener("error", function (e) {
-      var el = document.getElementById("app");
-      if (el && !el.children.length) {
-        var p = document.createElement("p");
-        p.style.cssText = "text-align:center;padding:40px 10px";
-        p.textContent = "Er ging iets mis: " + (e.message || "onbekende fout") +
-          (e.filename ? " (" + e.filename.split("/").pop() + ")" : "") +
-          ". Controleer of data.js, app.js en style.css naast index.html staan.";
-        el.appendChild(p);
-      }
-    });
-  </script>
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <div id="firebase-fout-balk"></div>
+
+  <!-- RECHTSBOVEN: vrienden + profiel -->
+  <div class="bovenbalk-knoppen">
+    <button id="btn-vrienden-badge" class="vrienden-badge" type="button">
+      <span class="vrienden-badge-icoon" aria-hidden="true">👥</span>
+      <span>Vrienden</span>
+      <span id="vrienden-badge-aantal" class="vrienden-badge-aantal" hidden>0</span>
+    </button>
+    <button id="btn-profiel-badge" class="profiel-badge" type="button">
+      <span id="profiel-badge-poppetje" class="profiel-badge-poppetje" aria-hidden="true"></span>
+      <span id="profiel-badge-tekst">🔑 Inloggen</span>
+    </button>
+  </div>
+
+  <div id="profiel-overlay" class="sitebeheer-overlay profiel-overlay">
+    <div class="sitebeheer-venster profiel-venster">
+      <div class="sitebeheer-icoon">👤</div>
+      <h3>Jouw profiel</h3>
+      <div id="profiel-overlay-poppetje" class="profiel-overlay-poppetje" aria-hidden="true"></div>
+      <p id="profiel-overlay-naam" class="subtitel"></p>
+      <button class="btn btn-secondary" id="btn-profiel-naam-wijzigen" type="button">✏️ Gebruikersnaam wijzigen</button>
+      <div id="profiel-naam-wijzigen-paneel" class="profiel-naam-paneel" hidden>
+        <input type="text" id="input-profiel-nieuwe-naam" maxlength="30" placeholder="Nieuwe gebruikersnaam" autocomplete="off">
+        <button class="btn btn-primary" id="btn-profiel-naam-opslaan" type="button">Opslaan</button>
+        <p id="profiel-naam-foutmelding" class="foutmelding"></p>
+      </div>
+      <button class="btn btn-secondary" id="btn-profiel-poppetje-wijzigen" type="button">🔁 Poppetje wijzigen</button>
+      <button class="btn btn-secondary" id="btn-profiel-uitloggen" type="button">🚪 Uitloggen</button>
+      <button class="btn btn-secondary" id="btn-profiel-verwijderen" type="button">🗑 Account verwijderen</button>
+      <div id="profiel-verwijder-paneel" class="profiel-naam-paneel" hidden>
+        <p>Je account, vrienden en alles wat je hebt wordt voorgoed verwijderd. Vul je wachtwoord in om door te gaan.</p>
+        <input type="password" id="input-profiel-verwijder-ww" placeholder="Wachtwoord" autocomplete="current-password">
+        <button class="btn btn-primary" id="btn-profiel-verwijder-bevestig" type="button">Definitief verwijderen</button>
+        <p id="profiel-verwijder-fout" class="foutmelding"></p>
+      </div>
+      <button class="btn btn-secondary" id="btn-profiel-overlay-sluiten" type="button">Sluiten</button>
+    </div>
+  </div>
+
+  <!-- ONDERBALK op de telefoon, ZIJBALK links op laptop en tablet -->
+  <nav id="telefoon-nav" class="telefoon-nav" aria-label="Hoofdmenu">
+    <button type="button" data-nav="start"><span class="nav-icoon">🏠</span><small>Start</small></button>
+    <button type="button" data-nav="vrienden"><span class="nav-icoon">👥<i id="nav-vrienden-aantal" class="nav-aantal" hidden>0</i></span><small>Vrienden</small></button>
+    <button type="button" data-nav="profiel"><span id="nav-profiel-poppetje" class="nav-icoon nav-poppetje">👤</span><small>Profiel</small></button>
+    <button type="button" id="nav-sitebeheer" data-nav="sitebeheer" hidden><span class="nav-icoon">⚙️</span><small>Sitebeheer</small></button>
+  </nav>
+
+  <div class="container">
+
+    <!-- SCHERM: ALGEMEEN (startscherm) -->
+    <section id="scherm-algemeen" class="scherm actief">
+      <h1 class="titel-regenboog">Quizzzzz</h1>
+      <p class="subtitel">Maak een quiz of doe mee met een quiz</p>
+      <div class="munten-weergave">💰 <span class="munten-aantal">0</span> munten</div>
+      <div id="account-status" class="account-status">
+        <div id="account-status-uit" hidden>
+          <strong>🔒 Je bent niet ingelogd</strong>
+          <p id="account-status-oud" class="subtitel"></p>
+                <p id="profiel-vereist-hint" class="subtitel">🔒 Log eerst in (of registreer een account met gebruikersnaam + wachtwoord) om quizzen te maken, de winkel, de dierenverzameling en het geluksrad te gebruiken. Meedoen aan een quiz en speelbare quizzen spelen kan altijd, ook zonder profiel.</p>
+          <div class="account-status-knoppen">
+            <button class="btn btn-primary" id="btn-status-inloggen" type="button">Inloggen</button>
+            <button class="btn btn-secondary" id="btn-status-registreren" type="button">Registreren</button>
+          </div>
+        </div>
+      </div>
+      <div class="vakken-rij">
+        <button class="vak vak-maken" id="btn-naar-quizmaken">📝 Quiz maken<span class="vak-slotje" aria-hidden="true">🔒</span></button>
+        <button class="vak vak-speelbaar" id="btn-naar-speelbaar">🌍 Speelbare quizzen</button>
+        <button class="vak vak-meedoen" id="btn-naar-meedoen">🙋 Meedoen aan quiz</button>
+        <button class="vak vak-winkel" id="btn-naar-winkel">🎁 Winkel<span class="vak-slotje" aria-hidden="true">🔒</span></button>
+        <button class="vak vak-dierentuin" id="btn-naar-dierentuin">🐾 Dierenverzameling<span class="vak-slotje" aria-hidden="true">🔒</span></button>
+        <button class="vak vak-wiel" id="btn-naar-wiel">🎡 Geluksrad<span class="vak-slotje" aria-hidden="true">🔒</span></button>
+      </div>
+
+    </section>
+
+    <!-- SCHERM: DIERENVERZAMELING (alle dieren en accessoires bekijken, ook buiten een quiz om) -->
+    <section id="scherm-dierenverzameling" class="scherm">
+      <button class="btn-terug" data-terug-naar="scherm-algemeen">&larr; Terug</button>
+      <h2 class="titel-regenboog">Dierenverzameling</h2>
+      <p id="verzameling-uitleg" class="subtitel">Dit heb je al, en dit kun je nog winnen. Klik op een dier of accessoire dat je al hebt om het te verkopen voor 5 munten. Grijs met een slotje = nog niet in bezit.</p>
+      <div class="munten-weergave">💰 <span class="munten-aantal">0</span> munten</div>
+      <div class="verzameling-tabs" id="verzameling-tabs" role="tablist"></div>
+      <div id="verzameling-kiezer" class="dieren-kiezer verzameling-kiezer"></div>
+    </section>
+
+    <!-- SCHERM: SPEELBARE QUIZZEN (openbaar gemaakt door anderen) -->
+    <section id="scherm-speelbare-quizzen" class="scherm">
+      <button class="btn-terug" data-terug-naar="scherm-algemeen">&larr; Terug</button>
+      <h2 class="titel-regenboog">Speelbare quizzen</h2>
+      <p class="subtitel">Quizzen die door anderen openbaar zijn gezet. Klik op "Spelen" om er zelf een wachtkamer voor te openen.</p>
+      <input type="text" id="input-zoek-speelbare-quizzen" class="zoekbalk" placeholder="🔍 Zoek op titel...">
+      <div id="lijst-openbare-quizzen" class="quizzen-grid"></div>
+    </section>
+
+    <!-- SCHERM: MEEDOEN AAN QUIZ -->
+    <section id="scherm-meedoen" class="scherm">
+      <button class="btn-terug" data-terug-naar="scherm-algemeen">&larr; Terug</button>
+      <h2 class="titel-regenboog">Meedoen aan quiz</h2>
+      <p>Voer de code in die je hebt gekregen en je naam. De quizmaster moet de quiz wel al gestart hebben op zijn/haar laptop.</p>
+      <label for="input-code">Code</label>
+      <input type="text" id="input-code" placeholder="Bijv. AB12CD" maxlength="6">
+      <label for="input-speler-naam">Jouw naam</label>
+      <input type="text" id="input-speler-naam" placeholder="Bijv. Sam" maxlength="20">
+      <button class="btn btn-primary" id="btn-ga-naar-quiz">Ga naar quiz</button>
+      <p id="meedoen-foutmelding" class="foutmelding"></p>
+    </section>
+
+    <!-- SCHERM: SPELER WACHTKAMER -->
+    <section id="scherm-speler-wachtkamer" class="scherm">
+      <button class="btn-terug" id="btn-speler-verlaat-wachtkamer">&larr; Terug</button>
+      <h2 class="titel-regenboog">Even geduld...</h2>
+      <div id="speler-wachtkamer-dier" class="speler-wachtkamer-dier" aria-hidden="true"></div>
+      <p>Je doet mee als <strong id="speler-wachtkamer-naam"></strong>. Wacht tot de quizmaster de quiz start.</p>
+      <p class="subtitel">Kies je poppetje. Het staat straks voor je naam bij het scorebord.</p>
+      <div class="kiezer-tabs" role="tablist">
+        <button type="button" class="kiezer-tab actief" id="tab-dieren" role="tab" aria-selected="true">🐶 Dieren</button>
+        <button type="button" class="kiezer-tab" id="tab-accessoires" role="tab" aria-selected="false">🎩 Accessoires</button>
+      </div>
+      <div id="dieren-kiezer" class="dieren-kiezer"></div>
+    </section>
+
+    <!-- SCHERM: SPELER VRAAG -->
+    <section id="scherm-speler-vraag" class="scherm">
+      <p id="speler-voortgang-weergave" class="voortgang"></p>
+      <h2 id="speler-vraag-weergave" class="titel-regenboog"></h2>
+      <img id="speler-vraag-foto" class="vraag-foto" alt="Foto bij de vraag" hidden>
+      <p id="speler-vraag-instructie" class="subtitel"></p>
+      <div id="speler-antwoorden-weergave" class="antwoorden-lijst"></div>
+      <button class="btn btn-primary" id="btn-speler-antwoord-versturen" disabled>Antwoord versturen</button>
+    </section>
+
+    <!-- SCHERM: SPELER ANTWOORD VERZONDEN (alleen een groot laadteken; je ziet nog niet of het goed was) -->
+    <section id="scherm-speler-antwoord-verzonden" class="scherm scherm-gecentreerd">
+      <div class="laad-spinner-groot" role="status" aria-label="Wachten op de quizmaster"></div>
+    </section>
+
+    <!-- SCHERM: SPELER RESULTAAT (goed of fout, met daaronder het goede antwoord) -->
+    <section id="scherm-speler-resultaat" class="scherm scherm-gecentreerd">
+      <div id="speler-resultaat-tekst" class="groot-resultaat"></div>
+      <p id="speler-antwoord-label" class="antwoord-kop"></p>
+      <div id="speler-antwoord-groot" class="antwoorden-lijst"></div>
+    </section>
+
+    <!-- SCHERM: SPELER VERWIJDERD -->
+    <section id="scherm-speler-verwijderd" class="scherm">
+      <h2 class="titel-regenboog">Je bent verwijderd</h2>
+      <p class="subtitel">De quizmaster heeft je uit deze quiz gezet.</p>
+      <button class="btn btn-primary" id="btn-speler-verwijderd-terug">Terug naar start</button>
+    </section>
+
+    <!-- SCHERM: HOST IS WEG -->
+    <section id="scherm-speler-host-weg" class="scherm">
+      <h2 class="titel-regenboog">De quiz is gestopt</h2>
+      <p class="subtitel">De quizmaster is gestopt of weggegaan, dus de quiz is beëindigd.</p>
+      <button class="btn btn-primary" id="btn-speler-host-weg-terug">Terug naar start</button>
+    </section>
+
+    <!-- SCHERM: SPELER SCOREBORD -->
+    <section id="scherm-speler-scorebord" class="scherm">
+      <h2 id="speler-scorebord-titel" class="titel-regenboog">Scorebord</h2>
+      <p id="speler-scorebord-bericht" class="voortgang"></p>
+      <div id="speler-scorebord-lijst" class="scorebord-lijst"></div>
+      <p id="speler-scorebord-status" class="voortgang">Wacht tot de quizmaster verdergaat...</p>
+      <button class="btn btn-secondary" id="btn-speler-terug-naar-start" style="display:none;">Terug naar start</button>
+    </section>
+
+    <!-- SCHERM: PROFIEL MAKEN (verplicht vóór quiz maken, winkel, dierenverzameling, geluksrad) -->
+    <section id="scherm-naam-invullen" class="scherm">
+      <button class="btn-terug" data-terug-naar="scherm-algemeen">&larr; Terug</button>
+      <h2 class="titel-regenboog" id="account-kop">Inloggen</h2>
+
+      <div id="account-keuze" class="account-tabs">
+        <button type="button" class="btn btn-secondary actief" id="tab-account-inloggen">Inloggen</button>
+        <button type="button" class="btn btn-secondary" id="tab-account-registreren">Registreren</button>
+      </div>
+      <p id="account-apparaat-melding" class="foutmelding" hidden></p>
+
+      <!-- INLOGGEN -->
+      <div id="account-inloggen-blok" class="account-blok">
+        <p class="subtitel">Log in met je gebruikersnaam en wachtwoord. Heb je nog geen account? Klik op Registreren.</p>
+        <label for="input-login-naam">Gebruikersnaam</label>
+        <input type="text" id="input-login-naam" maxlength="30" autocomplete="username" autocapitalize="off">
+        <label for="input-login-wachtwoord">Wachtwoord</label>
+        <input type="password" id="input-login-wachtwoord" autocomplete="current-password">
+        <button class="btn btn-primary" id="btn-inloggen" type="button">Inloggen</button>
+        <p id="login-foutmelding" class="foutmelding"></p>
+      </div>
+
+      <!-- REGISTREREN -->
+      <div id="account-registreren-blok" class="account-blok" hidden>
+        <p class="subtitel">Bedenk een gebruikersnaam en een wachtwoord (minstens 6 tekens). Daarna kies je een poppetje. Je kunt maximaal twee accounts per apparaat maken. Gewone bezoekers zien je naam niet; alleen sitebeheer kan zien wie een quiz heeft gemaakt.</p>
+        <label for="input-maker-naam">Gebruikersnaam</label>
+        <input type="text" id="input-maker-naam" placeholder="Bijv. Sam" maxlength="30" autocomplete="username" autocapitalize="off">
+        <div id="reg-wachtwoord-velden" class="account-blok">
+          <label for="input-reg-wachtwoord">Wachtwoord</label>
+          <input type="password" id="input-reg-wachtwoord" autocomplete="new-password">
+          <label for="input-reg-wachtwoord2">Wachtwoord nog een keer</label>
+          <input type="password" id="input-reg-wachtwoord2" autocomplete="new-password">
+        </div>
+        <div id="reg-beheer-keuze" class="account-blok">
+          <label class="openbaar-optie"><input type="checkbox" id="reg-is-beheer"> Sitebeheer account</label>
+          <div id="reg-beheer-velden" class="account-blok" hidden>
+            <p class="subtitel">Vul het e-mailadres en wachtwoord van sitebeheer in. Is dat goed, dan wordt dit account automatisch aan sitebeheer gekoppeld.</p>
+            <label for="input-reg-beheer-email">E-mailadres sitebeheer</label>
+            <input type="text" id="input-reg-beheer-email" placeholder="naam@voorbeeld.nl" autocomplete="off" autocapitalize="off">
+            <label for="input-reg-beheer-ww">Wachtwoord sitebeheer</label>
+            <input type="password" id="input-reg-beheer-ww" autocomplete="off">
+          </div>
+        </div>
+        <button class="btn btn-primary" id="btn-naam-bevestigen" type="button">Account maken</button>
+        <p id="naam-invullen-foutmelding" class="foutmelding"></p>
+      </div>
+
+      <!-- POPPETJE KIEZEN (na het registreren) -->
+      <div id="account-poppetje-blok" class="account-blok" hidden>
+        <p class="subtitel">Je account is gemaakt! Kies nu een poppetje als profielfoto. Je kunt het later altijd nog wijzigen.</p>
+        <div id="profiel-dieren-kiezer" class="dieren-kiezer"></div>
+        <button class="btn btn-primary" id="btn-poppetje-klaar" type="button">Klaar</button>
+        <p id="poppetje-foutmelding" class="foutmelding"></p>
+      </div>
+    </section>
+
+    <!-- SCHERM: SITEBEHEER BEZOEKT EEN PROFIEL (quizzen van die persoon) -->
+    <section id="scherm-beheer-bezoek" class="scherm">
+      <button class="btn-terug" id="btn-beheer-bezoek-terug" type="button">&larr; Terug naar profielen</button>
+      <h2 class="titel-regenboog" id="beheer-bezoek-kop">Quizzen</h2>
+      <div id="lijst-bezoek-quizzen" class="quizzen-grid"></div>
+    </section>
+
+    <!-- SCHERM: QUIZ MAKEN (overzicht) -->
+    <section id="scherm-quizmaken" class="scherm">
+      <button class="btn-terug" data-terug-naar="scherm-algemeen">&larr; Terug</button>
+      <h2 class="titel-regenboog">Mijn quizzen</h2>
+      <button class="btn btn-primary" id="btn-toevoegen-quiz">+ Quiz</button>
+      <div id="lijst-eigen-quizzen" class="quizzen-grid"></div>
+    </section>
+
+    <!-- SCHERM: NIEUWE QUIZ INVULLEN -->
+    <section id="scherm-nieuwe-quiz" class="scherm">
+      <button class="btn-terug" id="btn-nieuwe-quiz-terug">&larr; Terug</button>
+      <h2 class="titel-regenboog" id="nieuwe-quiz-titel-kop">Nieuwe quiz</h2>
+
+      <label for="input-titel">Titel van de quiz</label>
+      <input type="text" id="input-titel" placeholder="Bijv. Algemene kennis">
+
+      <label for="input-tijdslimiet">Tijd per vraag (bij live hosten)</label>
+      <select id="input-tijdslimiet">
+        <option value="10">10 seconden</option>
+        <option value="15">15 seconden</option>
+        <option value="20" selected>20 seconden</option>
+        <option value="25">25 seconden</option>
+        <option value="30">30 seconden</option>
+      </select>
+
+      <p id="geblokkeerd-melding" class="quiz-geblokkeerd-melding" hidden>
+        🔒 Deze quiz is geblokkeerd door sitebeheer en kan niet openbaar gezet worden totdat hij weer gedeblokkeerd wordt.
+      </p>
+
+      <label class="openbaar-optie">
+        <input type="checkbox" id="input-openbaar">
+        Deze quiz openbaar maken (zichtbaar voor iedereen bij "Speelbare quizzen")
+      </label>
+
+      <label class="openbaar-optie" id="solo-optie-rij" hidden>
+        <input type="checkbox" id="input-solo-toegestaan" checked>
+        Spelers mogen deze quiz ook alleen spelen (zonder quizmaster)
+      </label>
+
+      <label>Omslagfoto</label>
+      <div class="omslag-kiezer">
+        <div class="omslag-preview" id="omslag-preview">
+          <img id="omslag-preview-img" alt="Gekozen omslagfoto">
+        </div>
+        <div class="omslag-upload-rij">
+          <button class="btn btn-secondary" id="btn-omslag-uploaden" type="button">Eigen foto uploaden</button>
+          <input type="file" id="input-omslag-bestand" accept="image/*" style="display:none;">
+        </div>
+        <p class="omslag-subtitel">Of kies een standaardfoto:</p>
+        <div class="omslag-galerij" id="omslag-galerij"></div>
+      </div>
+
+      <div id="vragen-container"></div>
+
+      <button class="btn btn-secondary" id="btn-vraag-toevoegen" type="button">+ Vraag toevoegen</button>
+      <button class="btn btn-primary" id="btn-quiz-opslaan">Quiz opslaan</button>
+      <p id="quizmaken-foutmelding" class="foutmelding"></p>
+    </section>
+
+    <!-- SCHERM: QUIZ OPGESLAGEN (code weergeven) -->
+    <section id="scherm-quiz-klaar" class="scherm">
+      <button class="btn-terug" data-terug-naar="scherm-quizmaken">&larr; Terug</button>
+      <h2 class="titel-regenboog">Quiz klaar om te spelen! 🎉</h2>
+      <p>Deel deze code met anderen zodat zij kunnen meedoen:</p>
+      <div class="code-weergave" id="code-weergave"></div>
+      <button class="btn btn-primary" id="btn-nu-hosten">Nu hosten</button>
+      <button class="btn btn-secondary" data-terug-naar="scherm-algemeen">Naar startscherm</button>
+    </section>
+
+    <!-- SCHERM: HOST WACHTKAMER -->
+    <section id="scherm-host-wachtkamer" class="scherm">
+      <button class="btn-terug" id="btn-host-verlaat-wachtkamer">&larr; Terug</button>
+      <h2 id="host-wachtkamer-titel" class="titel-regenboog"></h2>
+      <p>Spelers doen mee via deze code:</p>
+      <div class="code-weergave" id="host-wachtkamer-code"></div>
+      <p id="host-wachtkamer-aantal" class="voortgang"></p>
+      <div id="host-wachtkamer-spelerslijst" class="wachtkamer-spelerslijst"></div>
+      <button class="btn btn-primary" id="btn-host-start-quiz">Start quiz</button>
+    </section>
+
+    <!-- SCHERM: HOST VRAAG (live tijdens quiz) -->
+    <section id="scherm-host-vraag" class="scherm">
+      <p id="host-voortgang-weergave" class="voortgang"></p>
+      <h2 id="host-vraag-weergave" class="titel-regenboog"></h2>
+      <div id="host-vraag-timer" class="vraag-timer" hidden>
+        <svg class="vraag-timer-ring" viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="vraag-timer-ring-baan" cx="50" cy="50" r="45"></circle>
+          <circle class="vraag-timer-ring-vulling" id="host-vraag-timer-vulling" cx="50" cy="50" r="45" transform="rotate(-90 50 50)"></circle>
+        </svg>
+        <span id="host-vraag-timer-getal" class="vraag-timer-getal"></span>
+      </div>
+      <img id="host-vraag-foto" class="vraag-foto" alt="Foto bij de vraag" hidden>
+      <div id="host-antwoorden-weergave" class="antwoorden-lijst"></div>
+      <p id="host-antwoord-teller" class="voortgang"></p>
+    </section>
+
+    <!-- SCHERM: HOST RESULTAAT (het goede antwoord + hoeveel spelers het goed hadden) -->
+    <section id="scherm-host-resultaat" class="scherm scherm-gecentreerd">
+      <p id="host-resultaat-voortgang" class="voortgang"></p>
+      <h2 id="host-resultaat-vraag" class="titel-regenboog host-resultaat-vraag"></h2>
+
+      <p id="host-antwoord-label" class="antwoord-kop"></p>
+      <div id="host-antwoord-groot" class="antwoorden-lijst"></div>
+
+      <div class="resultaat-onder">
+        <div class="resultaat-ring-wrap">
+          <svg class="resultaat-ring" viewBox="0 0 140 140" aria-hidden="true">
+            <circle class="resultaat-ring-baan" cx="70" cy="70" r="60"></circle>
+            <circle class="resultaat-ring-vulling" id="host-resultaat-ring" cx="70" cy="70" r="60" transform="rotate(-90 70 70)"></circle>
+          </svg>
+          <div class="resultaat-ring-midden">
+            <span id="host-resultaat-aantal" class="resultaat-aantal"></span>
+            <span class="resultaat-aantal-label">had het goed</span>
+          </div>
+        </div>
+
+        <div class="resultaat-tekstkolom">
+          <p id="host-resultaat-kop" class="resultaat-kop"></p>
+          <p id="host-resultaat-telling" class="groot-label"></p>
+          <div class="resultaat-chips">
+            <span class="resultaat-chip goed" id="host-resultaat-chip-goed"></span>
+            <span class="resultaat-chip fout" id="host-resultaat-chip-fout"></span>
+            <span class="resultaat-chip geen" id="host-resultaat-chip-geen"></span>
+          </div>
+        </div>
+      </div>
+
+      <p class="voortgang">De spelers zien nu of ze het goed of fout hadden, met het goede antwoord.</p>
+      <button class="btn btn-primary" id="btn-host-naar-scorebord">Doorgaan</button>
+    </section>
+
+    <!-- SCHERM: HOST SCOREBORD -->
+    <section id="scherm-host-scorebord" class="scherm">
+      <h2 id="host-scorebord-titel" class="titel-regenboog">Scorebord</h2>
+      <div id="host-scorebord-lijst" class="scorebord-lijst"></div>
+      <button class="btn btn-primary" id="btn-host-volgende-vraag">Volgende vraag</button>
+      <button class="btn btn-secondary" id="btn-host-afronden">Terug naar start</button>
+    </section>
+
+    <!-- SCHERM: SOLO VRAAG (alleen spelen, zonder quizmaster) -->
+    <section id="scherm-solo-vraag" class="scherm">
+      <button class="btn-terug" id="btn-solo-stoppen" type="button">&larr; Stoppen</button>
+      <p id="solo-voortgang" class="voortgang"></p>
+      <h2 id="solo-vraag-weergave" class="titel-regenboog"></h2>
+      <img id="solo-vraag-foto" class="vraag-foto" alt="Foto bij de vraag" hidden>
+      <p id="solo-vraag-instructie" class="subtitel"></p>
+      <div id="solo-antwoorden-weergave" class="antwoorden-lijst"></div>
+      <button class="btn btn-primary" id="btn-solo-antwoord-versturen" disabled>Antwoord versturen</button>
+    </section>
+
+    <!-- SCHERM: SOLO RESULTAAT (goed of fout, met het goede antwoord eronder) -->
+    <section id="scherm-solo-resultaat" class="scherm scherm-gecentreerd">
+      <div id="solo-resultaat-tekst" class="groot-resultaat"></div>
+      <p id="solo-antwoord-label" class="antwoord-kop"></p>
+      <div id="solo-antwoord-groot" class="antwoorden-lijst"></div>
+      <button class="btn btn-primary" id="btn-solo-volgende">Volgende vraag</button>
+    </section>
+
+    <!-- SCHERM: SOLO EINDE -->
+    <section id="scherm-solo-einde" class="scherm scherm-gecentreerd">
+      <h2 id="solo-einde-titel" class="titel-regenboog host-resultaat-vraag"></h2>
+      <p id="solo-einde-kop" class="resultaat-kop"></p>
+      <div class="resultaat-ring-wrap">
+        <svg class="resultaat-ring" viewBox="0 0 140 140" aria-hidden="true">
+          <circle class="resultaat-ring-baan" cx="70" cy="70" r="60"></circle>
+          <circle class="resultaat-ring-vulling" id="solo-einde-ring" cx="70" cy="70" r="60" transform="rotate(-90 70 70)"></circle>
+        </svg>
+        <div class="resultaat-ring-midden">
+          <span id="solo-einde-aantal" class="resultaat-aantal"></span>
+          <span class="resultaat-aantal-label">goed</span>
+        </div>
+      </div>
+      <p id="solo-einde-tekst" class="groot-label"></p>
+      <button class="btn btn-primary" id="btn-solo-opnieuw">Opnieuw spelen</button>
+      <button class="btn btn-secondary" id="btn-solo-terug">Terug</button>
+    </section>
+
+    <!-- SCHERM: WINKEL (mysterieboxen kopen) -->
+    <section id="scherm-winkel" class="scherm">
+      <button class="btn-terug" data-terug-naar="scherm-algemeen">&larr; Terug</button>
+      <h2 class="titel-regenboog">Winkel</h2>
+      <p class="subtitel">Koop mysterieboxen met munten. Alles wat erin zit, krijg en houd je voorgoed. Munten verdien je door een quiz "Met mensen" te winnen.</p>
+      <div class="munten-weergave">💰 <span class="munten-aantal">0</span> munten</div>
+      <button class="btn btn-primary" id="btn-winkel-nieuwe-box" type="button" style="display:none">+ Nieuwe mysteriebox maken</button>
+      <div id="winkel-boxen-lijst" class="quizzen-grid"></div>
+      <p id="winkel-geen-boxen" class="subtitel" style="display:none">Er zijn nog geen mysterieboxen. Kom later nog eens terug!</p>
+    </section>
+
+    <!-- SCHERM: GELUKSRAD (1x per dag gratis draaien voor munten) -->
+    <section id="scherm-wiel" class="scherm scherm-gecentreerd">
+      <button class="btn-terug" data-terug-naar="scherm-algemeen">&larr; Terug</button>
+      <h2 class="titel-regenboog">Geluksrad</h2>
+      <p class="subtitel">Draai 1 keer per dag gratis aan het rad en win munten. Klik op de knop in het midden!</p>
+      <div class="munten-weergave">💰 <span class="munten-aantal">0</span> munten</div>
+
+      <div class="wiel-omgeving">
+        <div class="wiel-wijzer">▼</div>
+        <div class="wiel-schijf" id="wiel-schijf"></div>
+        <button type="button" class="wiel-knop-midden" id="btn-wiel-draaien">DRAAI</button>
+      </div>
+
+      <p id="wiel-status" class="subtitel"></p>
+      <p id="wiel-resultaat" class="wiel-resultaat-tekst"></p>
+
+      <button class="btn btn-secondary" id="btn-wiel-aanpassen" type="button" style="display:none">⚙ Rad aanpassen</button>
+    </section>
+
+    <button class="btn-sitebeheer" id="btn-sitebeheer" type="button" hidden>⚙ Sitebeheer</button>
+
+  </div>
+
+  <!-- SPEELKEUZE: met mensen of alleen spelen -->
+  <div id="speelkeuze-overlay" class="sitebeheer-overlay">
+    <div class="sitebeheer-venster speelkeuze-venster">
+      <h3>Hoe wil je spelen?</h3>
+      <p id="speelkeuze-quiztitel"></p>
+
+      <button class="speelkeuze-optie" id="btn-speelkeuze-mensen" type="button">
+        <span class="speelkeuze-icoon">👥</span>
+        <span class="speelkeuze-tekst">
+          <strong>Met mensen</strong>
+          <small>Jij bent de quizmaster. Anderen doen mee met een code.</small>
+        </span>
+      </button>
+
+      <button class="speelkeuze-optie" id="btn-speelkeuze-alleen" type="button">
+        <span class="speelkeuze-icoon">🧍</span>
+        <span class="speelkeuze-tekst">
+          <strong>Zonder mensen</strong>
+          <small id="speelkeuze-alleen-uitleg">Speel de quiz zelf, zonder quizmaster.</small>
+        </span>
+      </button>
+
+      <div class="sitebeheer-knoppen">
+        <button class="btn btn-secondary" id="btn-speelkeuze-annuleren" type="button">Annuleren</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SITEBEHEER: wachtwoord-overlay -->
+  <div id="sitebeheer-overlay" class="sitebeheer-overlay">
+    <div class="sitebeheer-venster">
+      <div class="sitebeheer-icoon">🔐</div>
+      <h3>Sitebeheer</h3>
+      <p class="subtitel" id="sitebeheer-uitleg">Log in met het beheerdersaccount. Daarna kun je bij "Speelbare quizzen" quizzen uit die lijst verwijderen.</p>
+
+      <label for="input-sitebeheer-email">E-mailadres</label>
+      <input type="email" id="input-sitebeheer-email" placeholder="naam@voorbeeld.nl" autocomplete="username">
+
+      <label for="input-sitebeheer-wachtwoord">Wachtwoord</label>
+      <input type="password" id="input-sitebeheer-wachtwoord" placeholder="Wachtwoord" autocomplete="current-password">
+
+      <p id="sitebeheer-foutmelding" class="foutmelding"></p>
+      <div class="sitebeheer-knoppen">
+        <button class="btn btn-secondary" id="btn-sitebeheer-annuleren" type="button">Annuleren</button>
+        <button class="btn btn-primary" id="btn-sitebeheer-bevestigen" type="button">Inloggen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MYSTERIEBOX: aanmaken/aanpassen (alleen zichtbaar voor sitebeheer) -->
+  <div id="box-bewerken-overlay" class="sitebeheer-overlay">
+    <div class="sitebeheer-venster box-venster">
+      <h3 id="box-bewerken-titel">Nieuwe mysteriebox</h3>
+
+      <label for="input-box-naam">Naam van de box</label>
+      <input type="text" id="input-box-naam" placeholder="Bijv. Jungle box" maxlength="40">
+
+      <label for="input-box-prijs">Prijs (munten)</label>
+      <input type="number" id="input-box-prijs" min="0" step="10" value="100">
+
+      <label for="input-box-vanaf">Te koop vanaf (optioneel)</label>
+      <input type="date" id="input-box-vanaf">
+      <p class="subtitel">Leeg laten = meteen te koop. Vul je een datum in de toekomst in, dan zie jij de kist als sitebeheer alvast in de winkel, maar spelers pas zodra die datum is aangebroken.</p>
+
+      <label class="openbaar-optie">
+        <input type="checkbox" id="input-box-teaser">
+        Spelers mogen al zien dat deze kist eraan komt (naam, prijs en datum), maar kunnen hem nog niet kopen
+      </label>
+
+      <label for="input-box-tot">Automatisch offline vanaf (optioneel)</label>
+      <input type="date" id="input-box-tot">
+      <p class="subtitel">Leeg laten = blijft gewoon online. Vul je een datum in, dan gaat de kist die dag vanzelf offline (net als bij "Offline halen") — jij blijft hem als sitebeheer wel zien.</p>
+
+      <p>Kies wat erin zit. De koper krijgt en houdt alles wat je hier aanvinkt. Staat er een getalletje op een dier of accessoire, dan zit het al in zoveel andere kist(en).</p>
+
+      <div class="kiezer-groep-titel">Dieren</div>
+      <div id="box-items-dieren" class="dieren-kiezer accessoires"></div>
+
+      <div class="kiezer-groep-titel">Accessoires</div>
+      <div id="box-items-accessoires" class="dieren-kiezer accessoires"></div>
+
+      <p id="box-bewerken-foutmelding" class="foutmelding"></p>
+      <div class="sitebeheer-knoppen">
+        <button class="btn btn-secondary" id="btn-box-annuleren" type="button">Annuleren</button>
+        <button class="btn-verwijderen-quiz" id="btn-box-verwijderen" type="button" style="display:none">Verwijderen</button>
+        <button class="btn btn-primary" id="btn-box-opslaan" type="button">Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GELUKSRAD: vakken/beloningen aanpassen (alleen zichtbaar voor sitebeheer) -->
+  <div id="wiel-bewerken-overlay" class="sitebeheer-overlay">
+    <div class="sitebeheer-venster wiel-venster">
+      <h3>Geluksrad aanpassen</h3>
+      <p class="subtitel">Elke rij is één vak op het rad: kies eerst wat je erop wilt zetten (munten, een dier of een accessoire). Bij "kans" geef je aan hoe groot dat vak wordt: een hoger getal = een groter vak = vaker gewonnen. Zet overal hetzelfde getal voor evenveel kans op elk vak.</p>
+
+      <div id="wiel-segmenten-lijst" class="wiel-segmenten-lijst"></div>
+      <button type="button" class="btn btn-secondary" id="btn-wiel-segment-toevoegen">+ Vak toevoegen</button>
+
+      <p id="wiel-bewerken-foutmelding" class="foutmelding"></p>
+      <div class="sitebeheer-knoppen">
+        <button class="btn btn-secondary" id="btn-wiel-annuleren" type="button">Annuleren</button>
+        <button class="btn btn-primary" id="btn-wiel-opslaan" type="button">Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sjabloon voor één vak-rij in het geluksrad-bewerkvenster (wordt door JS gekloond) -->
+  <template id="sjabloon-wiel-segment-rij">
+    <div class="wiel-segment-rij">
+      <div class="wiel-segment-rij-boven">
+        <select class="wiel-segment-type">
+          <option value="munten">💰 Munten</option>
+          <option value="dier">🐾 Dier</option>
+          <option value="accessoire">🎩 Accessoire</option>
+        </select>
+        <input type="text" class="wiel-segment-naam" placeholder="Naam (leeg = automatisch)" maxlength="24">
+        <button type="button" class="wiel-segment-verwijderen" title="Vak verwijderen">✕</button>
+      </div>
+      <div class="wiel-segment-rij-onder">
+        <input type="number" class="wiel-segment-munten" min="0" step="5" placeholder="Aantal munten" value="10">
+        <select class="wiel-segment-dier" style="display:none"></select>
+        <select class="wiel-segment-accessoire" style="display:none"></select>
+        <input type="number" class="wiel-segment-kans" min="1" step="1" placeholder="Kans" value="1">
+      </div>
+    </div>
+  </template>
+
+  <!-- Sjabloon voor één vraagblok (wordt door JS gekloond) -->
+  <template id="sjabloon-vraag-blok">
+    <div class="vraag-blok">
+      <div class="vraag-blok-header">
+        <strong class="vraag-blok-titel">Vraag</strong>
+        <button class="btn-verwijder-vraag" type="button">Verwijderen</button>
+      </div>
+
+      <label>Vraag</label>
+      <input type="text" class="veld-vraag" placeholder="Typ hier de vraag">
+
+      <label>Foto bij deze vraag (niet verplicht)</label>
+      <div class="vraag-foto-kiezer">
+        <img class="vraag-foto-preview" alt="Gekozen foto bij de vraag" hidden>
+        <div class="vraag-foto-knoppen">
+          <button class="btn btn-secondary btn-vraag-foto-kiezen" type="button">Foto uploaden</button>
+          <button class="btn btn-secondary btn-vraag-foto-verwijderen" type="button" hidden>Foto verwijderen</button>
+        </div>
+        <input type="file" class="veld-vraag-foto-bestand" accept="image/*" style="display:none;">
+      </div>
+
+      <label>Aantal antwoorden</label>
+      <select class="veld-aantal-antwoorden">
+        <option value="4">4 antwoorden</option>
+        <option value="2">2 antwoorden (bijv. waar/niet waar)</option>
+      </select>
+
+      <label>Punten voor een goed antwoord</label>
+      <div class="punten-stepper">
+        <button type="button" class="btn-punten-stap btn-punten-min" aria-label="50 punten minder">−</button>
+        <input type="text" inputmode="numeric" pattern="[0-9.]*" class="veld-punten" value="1.000">
+        <button type="button" class="btn-punten-stap btn-punten-plus" aria-label="50 punten meer">+</button>
+      </div>
+
+      <label>Antwoorden — vink aan welk antwoord (of welke antwoorden) goed is/zijn</label>
+      <div class="antwoord-invoer-rij">
+        <input type="checkbox" class="veld-goed-vinkje" title="Dit antwoord is goed">
+        <input type="text" class="veld-antwoord" data-antwoord-index="1" placeholder="Antwoord 1">
+      </div>
+      <div class="antwoord-invoer-rij">
+        <input type="checkbox" class="veld-goed-vinkje" title="Dit antwoord is goed">
+        <input type="text" class="veld-antwoord" data-antwoord-index="2" placeholder="Antwoord 2">
+      </div>
+      <div class="antwoord-invoer-rij">
+        <input type="checkbox" class="veld-goed-vinkje" title="Dit antwoord is goed">
+        <input type="text" class="veld-antwoord" data-antwoord-index="3" placeholder="Antwoord 3">
+      </div>
+      <div class="antwoord-invoer-rij">
+        <input type="checkbox" class="veld-goed-vinkje" title="Dit antwoord is goed">
+        <input type="text" class="veld-antwoord" data-antwoord-index="4" placeholder="Antwoord 4">
+      </div>
+    </div>
+  </template>
+
+  <!-- VRIENDEN -->
+  <div id="vrienden-overlay" class="sitebeheer-overlay sociaal-overlay vrienden-overlay">
+    <div class="sitebeheer-venster sociaal-venster vrienden-venster">
+      <div class="sitebeheer-icoon">👥</div>
+      <h3>Vrienden</h3>
+      <div class="vrienden-hoofdknoppen">
+        <button id="btn-vrienden-toevoegen" class="btn btn-primary" type="button">➕ Toevoegen</button>
+      </div>
+      <div id="vrienden-toevoegen-paneel" class="vrienden-toevoegen-paneel" hidden>
+        <label for="input-zoek-vrienden">Gebruikersnaam zoeken</label>
+        <div class="vrienden-zoekrij">
+          <input type="text" id="input-zoek-vrienden" class="zoekbalk" placeholder="🔍 Zoek op naam..." maxlength="30" autocomplete="off">
+          <button id="btn-vrienden-zoeken" class="btn btn-secondary" type="button">Zoeken</button>
+        </div>
+        <div id="vrienden-zoekresultaten" class="vrienden-lijst"></div>
+      </div>
+      <p id="vrienden-verbindingsmelding" class="foutmelding" hidden></p>
+      <h3 class="vrienden-sectie-titel">📨 Verzoeken</h3>
+      <div id="vrienden-verzoeken" class="vrienden-lijst"></div>
+      <h3 class="vrienden-sectie-titel">🫂 Groepen</h3>
+      <div class="vrienden-hoofdknoppen">
+        <button id="btn-groep-nieuw" class="btn btn-secondary" type="button">➕ Nieuwe groep</button>
+      </div>
+      <div id="groepen-lijst" class="vrienden-lijst"></div>
+      <h3 class="vrienden-sectie-titel">👥 Mijn vrienden</h3>
+      <div id="vrienden-lijst" class="vrienden-lijst"></div>
+      <button id="btn-vrienden-sluiten" class="btn btn-secondary" type="button">Sluiten</button>
+    </div>
+  </div>
+
+  <!-- SITEBEHEER: alle profielen (alleen zichtbaar voor sitebeheer) -->
+  <div id="beheer-profielen-overlay" class="sitebeheer-overlay sociaal-overlay">
+    <div class="sitebeheer-venster sociaal-venster">
+      <div class="sitebeheer-icoon">⚙️</div>
+      <h3>Sitebeheer</h3>
+      <div class="account-tabs">
+        <button type="button" id="beheer-tab-profielen" class="btn btn-secondary actief">👥 Profielen</button>
+        <button type="button" id="beheer-tab-overzicht" class="btn btn-secondary">🐾 Overzicht</button>
+        <button type="button" id="beheer-tab-verdienen" class="btn btn-secondary">🪙 Verdienen</button>
+      </div>
+
+      <div id="beheer-pane-profielen" class="beheer-pane">
+        <p class="subtitel">Alle profielen (<span id="beheer-profielen-aantal">0</span>). Een profiel dat je verwijdert gaat ook uit Firebase en is dan ook bij die persoon weg.</p>
+        <input type="text" id="input-beheer-zoek" class="zoekbalk" placeholder="🔍 Zoek op naam..." autocomplete="off">
+        <p id="beheer-profielen-fout" class="foutmelding"></p>
+        <div id="beheer-profielen-lijst" class="vrienden-lijst"></div>
+      </div>
+
+      <div id="beheer-pane-overzicht" class="beheer-pane" hidden>
+        <h4>Poppetjes (<span id="beheer-dieren-aantal">0</span>)</h4>
+        <div id="beheer-dieren-raster" class="beheer-raster"></div>
+        <h4>Accessoires (<span id="beheer-accessoires-aantal">0</span>)</h4>
+        <div id="beheer-accessoires-raster" class="beheer-raster"></div>
+      </div>
+
+      <div id="beheer-pane-verdienen" class="beheer-pane" hidden>
+        <p class="subtitel">Kies hoeveel munten spelers verdienen. Bij elke soort geldt de regel met het hoogste aantal vragen dat niet groter is dan het aantal vragen van de quiz. Voorbeeld: "vanaf 10 vragen → 100 munten" geldt bij een quiz van 10 of meer vragen. Bij "Alleen spelen" krijg je de munten als je alles goed hebt.</p>
+        <div id="verdien-editor"></div>
+        <p id="verdien-fout" class="foutmelding"></p>
+        <button id="btn-verdien-opslaan" class="btn btn-primary" type="button">Opslaan</button>
+        <button id="btn-verdien-standaard" class="btn btn-secondary" type="button">Standaardlijst terugzetten</button>
+      </div>
+
+      <button id="beheer-profielen-sluiten" class="btn btn-secondary" type="button">Sluiten</button>
+    </div>
+  </div>
+
+  <!-- POPPETJE WIJZIGEN (beeldvullend) -->
+  <div id="poppetje-editor" class="poppetje-editor">
+    <div class="chat-kop">
+      <button id="btn-pe-terug" class="chat-kop-knop" type="button" title="Terug">←</button>
+      <h3>Mijn poppetje</h3>
+      <button id="btn-pe-klaar" class="chat-kop-knop" type="button" title="Klaar">✓</button>
+    </div>
+    <div class="pe-voorbeeld">
+      <div id="pe-voorbeeld-poppetje" class="pe-voorbeeld-poppetje"></div>
+      <div id="pe-chips" class="pe-chips"></div>
+    </div>
+    <div id="pe-tabs" class="pe-tabs"></div>
+    <div id="pe-inhoud" class="pe-inhoud"></div>
+  </div>
+
+  <!-- CHAT (beeldvullend) -->
+  <div id="chat-overlay" class="chat-scherm">
+    <div class="chat-kop">
+      <button id="btn-chat-sluiten" class="chat-kop-knop" type="button" title="Terug">←</button>
+      <div id="chat-kop-poppetje" class="chat-kop-poppetje"></div>
+      <h3 id="chat-titel">Chat</h3>
+      <button id="btn-chat-groep" class="chat-kop-knop" type="button" title="Leden en groepsinstellingen" hidden>👥</button>
+      <button id="btn-chat-stijl" class="chat-kop-knop" type="button" title="Achtergrond en tekstvakjes">🎨</button>
+    </div>
+
+    <div id="chat-stijl-paneel" class="chat-paneel chat-stijl-paneel" hidden>
+      <p class="chat-paneel-titel">Achtergrond</p>
+      <div id="chat-achtergronden" class="chat-keuzes"></div>
+      <p class="chat-paneel-titel">Mijn tekstvakjes</p>
+      <div id="chat-vak-eigen" class="chat-keuzes"></div>
+      <p class="chat-paneel-titel">Tekstvakjes van je vriend</p>
+      <div id="chat-vak-vriend" class="chat-keuzes"></div>
+    </div>
+
+    <div id="chat-berichten" class="chat-berichten"></div>
+
+    <div id="chat-groep-aan" class="chat-paneel chat-groep-aan" hidden>
+      <label for="select-groep-aan">🎯 Sturen naar:</label>
+      <select id="select-groep-aan"></select>
+    </div>
+
+    <div id="chat-poppetjes-paneel" class="chat-paneel chat-poppetjes-paneel" hidden>
+      <div class="chat-poppetjes-tabs">
+        <button id="chat-tab-dieren" class="chat-tab actief" type="button">Dieren</button>
+        <button id="chat-tab-accessoires" class="chat-tab" type="button">Accessoires</button>
+      </div>
+      <div id="chat-poppetjes-lijst" class="chat-poppetjes-lijst"></div>
+      <div class="chat-poppetjes-actie">
+        <span id="chat-poppetjes-keuze" class="chat-poppetjes-keuze">Kies een poppetje om te versturen</span>
+        <button id="btn-chat-poppetje-verzenden" class="btn btn-primary" type="button" disabled>🎁 Verzenden</button>
+      </div>
+    </div>
+
+    <div id="chat-quiz-paneel" class="chat-paneel chat-quiz-paneel" hidden>
+      <p class="chat-paneel-titel">Stuur een quiz naar <span id="chat-quiz-naam"></span></p>
+      <p class="chat-paneel-uitleg">Als je vriend accepteert, staat de quiz ook bij zijn Mijn quizzen en kan hij hem aanpassen. Jullie zien allebei de wijzigingen.</p>
+      <div id="chat-quiz-lijst" class="chat-quiz-lijst"></div>
+    </div>
+
+    <div id="chat-munten-paneel" class="chat-paneel chat-munten-paneel" hidden>
+      <p class="chat-paneel-titel">Stuur munten naar <span id="chat-munten-naam"></span></p>
+      <p class="chat-paneel-uitleg">Je hebt <strong id="chat-munten-saldo">0</strong> munten. Het bedrag gaat meteen van je af. Accepteert je vriend, dan krijgt hij ze; weigert hij of trek je het terug, dan krijg je ze terug.</p>
+      <div class="chat-munten-snel">
+        <button type="button" class="btn btn-secondary" data-munten="10">10</button>
+        <button type="button" class="btn btn-secondary" data-munten="50">50</button>
+        <button type="button" class="btn btn-secondary" data-munten="100">100</button>
+        <button type="button" class="btn btn-secondary" data-munten="500">500</button>
+      </div>
+      <div class="chat-munten-actie">
+        <input id="chat-munten-aantal" type="number" min="1" step="1" inputmode="numeric" placeholder="Aantal munten">
+        <button id="btn-chat-munten-verzenden" class="btn btn-primary" type="button">🪙 Verzenden</button>
+      </div>
+    </div>
+
+    <div class="chat-invoer">
+      <button id="btn-chat-poppetje" class="chat-poppetje-knop" type="button" title="Poppetje versturen">
+        <span class="chat-poppetje-knop-plaatje" id="chat-poppetje-knop-plaatje"></span>
+        <span class="chat-poppetje-knop-plus">+</span>
+      </button>
+      <button id="btn-chat-quiz" class="chat-poppetje-knop" type="button" title="Quiz versturen">
+        <span class="chat-poppetje-knop-plaatje">📝</span>
+        <span class="chat-poppetje-knop-plus">+</span>
+      </button>
+      <button id="btn-chat-munten" class="chat-poppetje-knop" type="button" title="Munten versturen">
+        <span class="chat-poppetje-knop-plaatje">🪙</span>
+        <span class="chat-poppetje-knop-plus">+</span>
+      </button>
+      <input id="chat-input" type="text" maxlength="500" placeholder="Typ een bericht..." autocomplete="off">
+      <button id="btn-chat-sturen" class="btn btn-primary" type="button">Sturen</button>
+    </div>
+  </div>
+
+  <!-- SITEBEHEER: POPPETJE VAN IEMAND ANDERS KIEZEN -->
+  <div id="beheer-poppetje-overlay" class="sitebeheer-overlay sociaal-overlay beheer-poppetje-overlay">
+    <div class="sitebeheer-venster sociaal-venster">
+      <div class="sitebeheer-icoon">🎨</div>
+      <h3 id="beheer-poppetje-titel">Poppetje kiezen</h3>
+      <p class="subtitel">Je kunt elk dier en elk accessoire kiezen. Wat je kiest komt ook bij die persoon in de verzameling.</p>
+      <div class="groep-foto-rij">
+        <div id="beheer-poppetje-voorbeeld" class="groep-foto-voorbeeld"></div>
+        <div class="groep-foto-knoppen">
+          <button id="btn-beheer-poppetje-opslaan" class="btn btn-primary" type="button">💾 Opslaan</button>
+        </div>
+      </div>
+      <div id="beheer-poppetje-tabs" class="pe-tabs"></div>
+      <div id="beheer-poppetje-raster" class="pe-raster"></div>
+      <p id="beheer-poppetje-fout" class="foutmelding"></p>
+      <button id="btn-beheer-poppetje-sluiten" class="btn btn-secondary" type="button">Sluiten</button>
+    </div>
+  </div>
+
+  <!-- GROEP MAKEN / BEHEREN -->
+  <div id="groep-overlay" class="sitebeheer-overlay sociaal-overlay groep-overlay">
+    <div class="sitebeheer-venster sociaal-venster">
+      <div class="sitebeheer-icoon">🫂</div>
+      <h3 id="groep-titel">Nieuwe groep</h3>
+      <div id="groep-maak-blok" class="account-blok">
+        <label for="input-groep-naam">Naam van de groep</label>
+        <input type="text" id="input-groep-naam" maxlength="30" placeholder="Bijv. Quizclub" autocomplete="off">
+        <label>Kies vrienden voor de groep</label>
+        <div id="groep-maak-vrienden" class="vrienden-lijst"></div>
+        <p id="groep-foutmelding" class="foutmelding"></p>
+        <button id="btn-groep-maken" class="btn btn-primary" type="button">✓ Groep maken</button>
+      </div>
+      <div id="groep-beheer-blok" class="account-blok" hidden>
+        <div id="groep-hernoem-blok" class="account-blok">
+          <label for="input-groep-hernoem">Naam van de groep</label>
+          <div class="vrienden-zoekrij">
+            <input type="text" id="input-groep-hernoem" maxlength="30" autocomplete="off">
+            <button id="btn-groep-hernoem" class="btn btn-primary" type="button">Opslaan</button>
+          </div>
+          <p id="groep-hernoem-fout" class="foutmelding"></p>
+        </div>
+        <div id="groep-foto-blok" class="account-blok">
+          <h4 class="vrienden-sectie-titel">Groepsfoto</h4>
+          <p class="subtitel">Kies een van je eigen poppetjes. Het maakt niet uit wat je profielpoppetje is.</p>
+          <div class="groep-foto-rij">
+            <div id="groep-foto-voorbeeld" class="groep-foto-voorbeeld"></div>
+            <div class="groep-foto-knoppen">
+              <button id="btn-groep-foto-opslaan" class="btn btn-primary" type="button">💾 Opslaan als groepsfoto</button>
+              <button id="btn-groep-foto-weg" class="btn btn-secondary" type="button">✕ Geen foto</button>
+            </div>
+          </div>
+          <div id="groep-foto-tabs" class="pe-tabs"></div>
+          <div id="groep-foto-raster" class="pe-raster"></div>
+          <p id="groep-foto-fout" class="foutmelding"></p>
+        </div>
+        <h4 class="vrienden-sectie-titel">Leden</h4>
+        <div id="groep-leden-lijst" class="vrienden-lijst"></div>
+        <div id="groep-toevoegen-blok" class="account-blok">
+          <h4 class="vrienden-sectie-titel">Vrienden toevoegen</h4>
+          <div id="groep-toevoegen-lijst" class="vrienden-lijst"></div>
+        </div>
+        <button id="btn-groep-verlaten" class="btn btn-secondary" type="button">🚪 Groep verlaten</button>
+        <button id="btn-groep-verwijderen" class="btn btn-secondary" type="button">🗑 Groep verwijderen</button>
+      </div>
+      <button id="btn-groep-sluiten" class="btn btn-secondary" type="button">Sluiten</button>
+    </div>
+  </div>
+
+  <!-- ITEM NAAR VRIEND STUREN -->
+  <div id="stuur-vriend-overlay" class="sitebeheer-overlay sociaal-overlay">
+    <div class="sitebeheer-venster sociaal-venster">
+      <div class="sitebeheer-icoon">🎁</div>
+      <h3>Stuur naar vriend</h3>
+      <p class="subtitel">Je stuurt precies 1 exemplaar.</p>
+      <div id="stuur-vriend-lijst" class="vrienden-lijst"></div>
+      <button id="btn-stuur-vriend-sluiten" class="btn btn-secondary" type="button">Annuleren</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+  <script src="firebase-config.js?v=20261006a"></script>
+  <script src="poppetjes.js?v=20261006a"></script>
+  <script src="app.js?v=20261006a"></script>
+  <script src="telefoon.js?v=20261006a"></script>
 </body>
 </html>
